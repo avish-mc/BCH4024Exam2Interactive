@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why did that happen? Metabolism logic drills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#0c2a52; --bg2:#09203f;
+  --line:rgba(214,232,255,.2); --line2:rgba(214,232,255,.55);
+  --ink:#eef5ff; --dim:#a9c2e6;
+  --yel:#ffd23f; --cy:#72d6ff; --ok:#62e2ae; --bad:#ff6f5a;
+  --disp:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+html{background:var(--bg)}
+body{
+  margin:0;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(rgba(214,232,255,.14) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(214,232,255,.14) 1px,transparent 1px),
+    linear-gradient(rgba(214,232,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(214,232,255,.05) 1px,transparent 1px);
+  background-size:100px 100px,100px 100px,20px 20px,20px 20px;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--cy);outline-offset:2px}
+
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto;min-height:100vh}
+.rail{border-right:1px solid var(--line2);padding:28px 22px;display:flex;flex-direction:column;gap:26px;background:rgba(9,32,63,.72)}
+.nav{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.nav button{background:none;border:0;border-bottom:1px solid var(--line);text-align:left;padding:12px 4px 12px 14px;cursor:pointer;position:relative}
+.nav button b{display:block;font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:.02em}
+.nav button span{display:block;color:var(--dim);font-size:14px;line-height:1.3}
+.nav button:hover{background:rgba(255,255,255,.06)}
+.nav button.on{background:rgba(255,210,63,.1)}
+.nav button.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--yel)}
+.fb{margin-top:auto}
+.fb p{margin:0 0 8px;font-size:14px;color:var(--dim)}
+.seg{display:flex;border:1px solid var(--line2)}
+.seg button{flex:1;background:none;border:0;padding:8px 6px;cursor:pointer;font-size:14px}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:var(--ink);color:var(--bg2);font-weight:700}
+
+main{padding:28px 26px 60px;min-width:0}
+.sheet{position:relative;border:1px solid var(--line2);background:rgba(9,32,63,.78);padding:30px clamp(16px,3.5vw,38px) 22px}
+.sheet::before,.sheet::after{content:"";position:absolute;width:16px;height:16px;border:3px solid var(--yel)}
+.sheet::before{left:-3px;top:-3px;border-right:0;border-bottom:0}
+.sheet::after{right:-3px;bottom:-3px;border-left:0;border-top:0}
+
+h3.q{font-family:var(--body);font-weight:700;font-size:clamp(19px,2.4vw,23px);line-height:1.35;margin:6px 0 18px}
+.lede{color:var(--dim);margin:0 0 22px;max-width:62ch}
+.tag{color:var(--yel);font-size:15px;font-weight:700;margin:0 0 4px}
+
+.list{border-top:1px solid var(--line2)}
+.list button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line2);padding:16px 10px 16px 18px;cursor:pointer;position:relative}
+.list button b{display:block;font-family:var(--disp);font-size:28px;font-weight:700;letter-spacing:.02em;line-height:1.1}
+.list button span{color:var(--dim);font-size:16px}
+.list button:hover{background:rgba(255,210,63,.1)}
+.list button:hover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--yel)}
+
+.ticks{display:flex;align-items:center;gap:4px;margin-bottom:20px;flex-wrap:wrap}
+.ticks::before,.ticks::after{content:"";width:2px;height:16px;background:var(--line2)}
+.tick{flex:1;height:6px;border:1px solid var(--line2);max-width:44px;min-width:14px}
+.tick.cur{background:var(--yel);border-color:var(--yel)}
+.tick.done{background:var(--ink);border-color:var(--ink)}
+.tick.ok{background:var(--ok);border-color:var(--ok)}
+.tick.bad{background:var(--bad);border-color:var(--bad)}
+
+.ribbon{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:20px;font-size:14px}
+.ribbon .s{border:1px solid var(--line2);background:var(--bg2);padding:3px 10px}
+.ribbon .s i{font-style:normal;color:var(--yel);font-weight:700;margin-right:6px}
+.ribbon .ar{color:var(--dim)}
+
+.case{border:1px solid var(--line2);margin:0 0 20px;background:rgba(255,255,255,.04)}
+.case>summary{cursor:pointer;padding:9px 14px;font-weight:700;list-style:none;display:block}
+.case>summary::-webkit-details-marker{display:none}
+.case>summary::before{content:"+ ";color:var(--yel)}
+.case[open]>summary::before{content:"- "}
+.case .inner{padding:0 14px 14px}
+.case .exam{margin:4px 0 12px}
+.case .chips{margin:0}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 20px}
+.chip{border:1px solid var(--line2);background:var(--bg2);padding:5px 12px;font-size:16px;text-align:left}
+.chip b{font-family:var(--disp);font-size:26px;margin-left:8px;color:var(--yel);vertical-align:-2px}
+.chip.dn b{color:var(--cy)}
+.chip.eq b{font-family:var(--body);font-size:15px;color:var(--dim);vertical-align:0}
+button.chip{cursor:pointer}
+button.chip:hover:not(:disabled){background:rgba(255,255,255,.1)}
+button.chip:disabled{cursor:default}
+.chip.on{background:var(--ink);color:var(--bg2);border-color:var(--ink)}
+.chip.on b{color:var(--bg2)}
+.chip.ok{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok)}
+.chip.bad{border-color:var(--bad);box-shadow:inset 0 0 0 2px var(--bad);text-decoration:line-through}
+.chip.miss{border:2px dashed var(--yel)}
+.exam{background:#f1f5fb;color:#13203a;padding:16px 20px;font-size:16px;line-height:1.5;white-space:pre-wrap;margin:6px 0 20px;border-left:6px solid var(--dim)}
+
+.opts{border-bottom:1px solid var(--line)}
+.opt{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:13px 8px;cursor:pointer}
+.opt:hover:not(:disabled){background:rgba(255,255,255,.07)}
+.opt:disabled{cursor:default}
+.bub{flex:0 0 auto;width:30px;height:30px;border:1.5px solid var(--line2);border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;margin-top:-1px}
+.opt.sel .bub{background:var(--ink);color:var(--bg2);border-color:var(--ink)}
+.opt.ok .bub{background:var(--ok);border-color:var(--ok);color:#06241a}
+.opt.bad .bub{background:var(--bad);border-color:var(--bad);color:#2a0804}
+.opt.miss .bub{border:2px dashed var(--yel);color:var(--yel)}
+.opt.ok .t{box-shadow:inset 0 -.45em rgba(98,226,174,.28)}
+.opt.bad .tx{text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:2px;color:var(--dim)}
+.rs{display:block;margin-top:4px;font-size:15px;line-height:1.4;color:var(--dim)}
+.opt.ok .rs{color:var(--ok)}
+.opt.bad .rs{color:#ffb3a8}
+.opt.miss .rs{color:var(--yel)}
+
+.note{margin-top:22px;border:1px solid var(--line2);border-left:6px solid var(--ok);background:rgba(255,255,255,.05);padding:14px 18px}
+.note.bad{border-left-color:var(--bad)}
+.note h4{margin:0 0 4px;font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:.02em}
+.note p{margin:0 0 6px}
+.note small{color:var(--dim);font-size:15px}
+
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;align-items:center}
+.btn{background:var(--yel);color:#1b1500;border:0;padding:12px 24px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line2)}
+.warn{color:var(--yel);font-size:15px}
+
+.chain{display:flex;flex-wrap:wrap;gap:16px 0;align-items:stretch;margin:12px 0 22px}
+.node{min-width:94px;max-width:136px;padding:8px 8px 4px;border:1.5px solid var(--ink);text-align:center;cursor:pointer;background:var(--bg2);font-size:15px;line-height:1.2;user-select:none;display:flex;flex-direction:column;justify-content:space-between}
+.node:hover{background:rgba(255,255,255,.1)}
+.node .mk{font-family:var(--disp);font-size:34px;font-weight:800;line-height:1.1;min-height:38px;color:var(--dim)}
+.node .mk small{display:block;font-family:var(--body);font-size:12px;font-weight:700;line-height:1.1;color:var(--ink)}
+.node.up .mk{color:var(--yel)}
+.node.dn .mk{color:var(--cy)}
+.node.ok{border-color:var(--ok)}
+.node.bad{border-color:var(--bad)}
+.node.locked{cursor:default}
+.link{flex:1 1 60px;min-width:60px;max-width:116px;text-align:center;font-size:12px;line-height:1.15;color:var(--dim);align-self:center;padding:0 3px}
+.link i{display:block;height:2px;background:var(--ink);margin-top:4px;position:relative}
+.link i::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left:9px solid var(--ink);border-right:0}
+.link.blocked{color:var(--yel);font-weight:700}
+.link.blocked i{background:repeating-linear-gradient(90deg,var(--yel) 0 6px,transparent 6px 10px)}
+.link.blocked i::after{border-left-color:var(--yel)}
+.link .stamp{display:inline-block;margin-top:5px;border:1.5px solid var(--yel);padding:0 6px;font-style:normal;font-weight:700;font-size:12px}
+.sub2{font-size:15px;color:var(--dim);margin:18px 0 8px}
+.extras{display:flex;flex-wrap:wrap;gap:10px}
+.pile{background:none;border:1.5px solid var(--line2);padding:6px 12px;cursor:pointer;font-size:15px}
+.pile:hover:not(:disabled){background:rgba(255,255,255,.08)}
+.pile.on{background:var(--ink);color:var(--bg2);border-color:var(--ink);font-weight:700}
+.pile.ok{background:var(--ok);border-color:var(--ok);color:#06241a;font-weight:700}
+.pile.bad{background:var(--bad);border-color:var(--bad);color:#2a0804;font-weight:700}
+
+.tblock{display:grid;grid-template-columns:repeat(4,auto);width:max-content;max-width:100%;margin:30px 0 0 auto;border:1px solid var(--line2);font-size:14px}
+.tblock div{padding:5px 14px 6px;border-left:1px solid var(--line2)}
+.tblock div:first-child{border-left:0}
+.tblock span{display:block;color:var(--dim);font-size:12px}
+.tblock b{font-weight:700}
+
+.score{font-family:var(--disp);font-weight:800;font-size:clamp(72px,12vw,120px);line-height:.9;margin:6px 0 4px}
+.score small{font-size:.4em;color:var(--dim);font-weight:700}
+details.r{border-top:1px solid var(--line);padding:10px 0}
+details.r:last-of-type{border-bottom:1px solid var(--line)}
+details.r summary{cursor:pointer;display:flex;gap:12px;align-items:baseline}
+details.r summary .m{font-family:var(--disp);font-size:24px;font-weight:800;width:22px;flex:0 0 auto}
+details.r summary .m.ok{color:var(--ok)}
+details.r summary .m.bad{color:var(--bad)}
+details.r .body{padding:8px 0 4px 34px;color:var(--ink);font-size:16px}
+details.r .body p{margin:0 0 6px}
+.weak{border:1px solid var(--line2);border-left:6px solid var(--yel);padding:12px 16px;margin:18px 0}
+.weak b{font-family:var(--disp);font-size:22px;letter-spacing:.02em}
+
+footer{margin-top:22px;color:var(--dim);font-size:14px;max-width:70ch}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .rail{border-right:0;border-bottom:1px solid var(--line2);gap:16px;padding:20px 16px}
+  .nav{display:grid;grid-template-columns:1fr 1fr}
+  .nav button span{display:none}
+  .nav button{border-right:1px solid var(--line)}
+  .fb{margin-top:0}
+  main{padding:18px 12px 50px}
+  .tblock{grid-template-columns:repeat(2,auto)}
+  .tblock div:nth-child(3){border-left:0;border-top:1px solid var(--line2)}
+  .tblock div:nth-child(4){border-top:1px solid var(--line2)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <nav class="nav" id="nav">
+      <button data-mode="cascade" class="on"><b>Cascade</b><span>Hormone to receptor to enzyme to result</span></button>
+      <button data-mode="trace"><b>Block it</b><span>Block one enzyme, mark what piles up or runs short</span></button>
+      <button data-mode="detect"><b>Find the fault</b><span>Read a case, circle the clues, answer exam style</span></button>
+      <button data-mode="crit"><b>Fix the question</b><span>Spot the flaw, pick the best rewrite</span></button>
+    </nav>
+    <div class="fb">
+      <p>Feedback for the next round</p>
+      <div class="seg" id="seg">
+        <button data-v="instant" class="on">After each</button>
+        <button data-v="end">At the end</button>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div id="app"></div>
+    <footer>Practice material written for SI sessions. It is not from your professors, so check it against your own lecture slides.</footer>
+  </main>
+</div>
+
+<script>
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const arrow = d => d > 0 ? '↑' : d < 0 ? '↓' : '↔';
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const L = i => String.fromCharCode(65+i);
+
+/* Item builders. In every builder the CORRECT option is listed first;
+   options are shuffled when shown.                                   */
+const S = (label,chain,tag,q,a,w,why) => ({kind:'mc',label,chain,tag,q,opts:[a,...w],why});
+/* R: multiple choice where every option carries its own reason (study nugget style) */
+const R = (tag,q,pairs) => ({kind:'mc',tag,q,opts:pairs.map(p=>p[0]),rs:pairs.map(p=>p[1]),why:pairs[0][1]});
+/* MR: select all that apply (rows) */
+const MR = (tag,q,items) => ({kind:'multi',style:'rows',tag,q,items:items.map(([t,key,why])=>({t,key,why})),allowExtra:0});
+/* lab finding for case chips */
+const lab = (n,v,key,why) => ({n,v,key:!!key,why});
+
+/* ================= DATA: cascades ================= */
+const SCEN = {
+  fed:{ name:'Fed state', blurb:'Big carb-rich meal, blood glucose climbing. Follow insulin all the way to the liver.', steps:[
+    S('Trigger','Insulin released','Hormone and receptor',
+      'You just ate a big carb-rich meal and blood glucose is climbing. What does the pancreas release?',
+      'Insulin from beta cells (gut GLP-1 helps boost this release)',
+      ['Glucagon from alpha cells','Insulin from alpha cells','Epinephrine from the pancreas'],
+      'High blood glucose makes beta cells secrete insulin. GLP-1 is a gut hormone that amplifies that release, but insulin is the hormone that acts on liver, muscle, and fat.'),
+    S('Receptor','RTK autophosphorylates','Hormone and receptor',
+      'What kind of receptor does insulin bind, and what does it do first?',
+      'Receptor tyrosine kinase: dimerizes and autophosphorylates Tyr residues',
+      ['Gs-coupled GPCR: swaps GDP for GTP and raises cAMP','Ligand-gated channel: opens and lets Na⁺ in','Nuclear receptor: travels straight to DNA'],
+      'Insulin uses an RTK. The phosphorylated Tyr residues become docking sites for SH2 proteins like IRS1 and Grb2. The Gs and cAMP route belongs to glucagon and epinephrine.'),
+    S('Switch','PP1 active, dephosphorylation','Kinase and phosphatase switch',
+      'Which statement describes the "mode" the liver cell enters after insulin signaling?',
+      'Protein phosphatase 1 (PP1) becomes active, so target enzymes get dephosphorylated',
+      ['PKA becomes active, so target enzymes get phosphorylated','cAMP rises, so phosphorylase kinase turns on','Ras and ERK directly flip the metabolic enzymes'],
+      'The fed state is a dephosphorylation state (insulin leads to PP1). Fasting and stress are phosphorylation states (cAMP leads to PKA). The Ras and ERK branch drives gene expression, not the metabolic switch.'),
+    S('Glucose trap','Glucokinase moves to cytosol','Enzyme regulation',
+      'Glucose floods into the liver. What lets glucokinase (hexokinase IV) trap it as G6P?',
+      'High glucose releases it from a nuclear regulatory protein, and its high Km means it works best at high glucose',
+      ['PKA phosphorylates it and switches it on','G6P activates it as a feed-forward signal','F2,6BP binds it directly and activates it'],
+      'Glucokinase sits in the nucleus bound to a regulatory protein when glucose is low. High glucose frees it to move to the cytosol. F6P strengthens that binding, and G6P does not inhibit it the way it inhibits other hexokinases.'),
+    S('Glycogen','Synthase ON, phosphorylase OFF','Enzyme regulation',
+      'PP1 is active. What happens to the two glycogen enzymes?',
+      'Glycogen synthase is dephosphorylated (ON) and glycogen phosphorylase is dephosphorylated (OFF)',
+      ['Synthase is phosphorylated (OFF) and phosphorylase is phosphorylated (ON)','Both enzymes are dephosphorylated and ON','Both enzymes are phosphorylated and OFF'],
+      'The two enzymes follow opposite rules. Synthase: dephosphorylated means ON. Phosphorylase: phosphorylated (the "a" form) means ON, so dephosphorylated means OFF. That keeps glycogen from being built and broken at the same time.'),
+    S('Glycolysis switch','PFK-2 ON, F2,6BP up, glycolysis up','Enzyme regulation',
+      'The liver bifunctional enzyme (PFK-2/FBPase-2) gets dephosphorylated. What follows?',
+      'PFK-2 activity wins, F2,6BP rises, PFK-1 is activated, glycolysis ↑',
+      ['FBPase-2 activity wins, F2,6BP falls, PFK-1 slows, glycolysis ↓','PFK-2 activity wins, F2,6BP rises, FBPase-1 is activated, gluconeogenesis ↑','FBPase-2 activity wins, F2,6BP rises, glycolysis ↑'],
+      'Dephosphorylated, the bifunctional enzyme acts as PFK-2 and makes F2,6BP. F2,6BP activates PFK-1 and inhibits FBPase-1. Phosphorylated, it acts as FBPase-2, which goes with glucagon and gluconeogenesis.'),
+    S('PDH','PDH ON','Enzyme regulation',
+      'Insulin also stimulates PDP (pyruvate dehydrogenase phosphatase). What happens to the PDH complex?',
+      'It is dephosphorylated and active, so pyruvate is converted to acetyl-CoA',
+      ['It is phosphorylated and inactive','It does not change, because PDH is not hormonally regulated','It is active only when ATP is low and NADH is high'],
+      'PDP removes the phosphate, which turns PDH ON. High NADH, acetyl-CoA, and ATP inhibit PDH, so the "ATP low and NADH high" idea is backwards.'),
+    S('Net result','Blood glucose down','Putting it together',
+      'Which set best describes the liver in the fed state?',
+      'Glycolysis ↑, glycogen synthesis ↑, gluconeogenesis ↓, blood glucose ↓',
+      ['Glycolysis ↓, glycogen breakdown ↑, gluconeogenesis ↑, blood glucose ↑','Glycolysis ↑, glycogen breakdown ↑, gluconeogenesis ↓, blood glucose ↑','Glycolysis ↓, glycogen synthesis ↑, gluconeogenesis ↑, blood glucose ↓'],
+      'Every switch pointed the same way: burn and store glucose, stop making it. Check each wrong option for one flipped piece. That is how most exam distractors are built.')
+  ]},
+  fasted:{ name:'Fasting (glucagon)', blurb:'Hours without food, blood glucose falling. Follow glucagon through the liver.', steps:[
+    S('Trigger','Glucagon released','Hormone and receptor',
+      'Several hours into a fast, blood glucose is falling. Which hormone is released, and from where?',
+      'Glucagon from pancreatic alpha cells',
+      ['Insulin from pancreatic beta cells','Insulin from pancreatic alpha cells','Glucagon from pancreatic beta cells'],
+      'Low glucose means glucagon from alpha cells. Beta cells make insulin. Two of the wrong options just swap the cell and hormone pair.'),
+    S('Receptor','Gs GPCR','Hormone and receptor',
+      'What kind of receptor does glucagon bind in the hepatocyte?',
+      'Gs-coupled GPCR',
+      ['Receptor tyrosine kinase','Gi-coupled GPCR','Ligand-gated ion channel'],
+      'Glucagon uses a Gs-coupled GPCR (as does epinephrine at the beta-adrenergic receptor). RTKs are the insulin side.'),
+    S('Messenger','cAMP up, PKA active','Kinase and phosphatase switch',
+      'Which order of events is correct after glucagon binds?',
+      'G protein swaps GDP for GTP, adenylyl cyclase is stimulated, cAMP rises, PKA is activated',
+      ['Receptor dimerizes, IRS1 is phosphorylated, Ras is activated, ERK is activated','GTP phosphorylates the G protein, phospholipase C is activated, IP3 rises','PKA is activated first, then cAMP rises, then adenylyl cyclase turns on'],
+      'GPCR activation is a nucleotide exchange (GDP out, GTP in), not a phosphorylation. The cascade runs G protein, adenylyl cyclase, cAMP, PKA.'),
+    S('Glycogen','Phosphorylase ON, synthase OFF','Enzyme regulation',
+      'PKA (through phosphorylase kinase) phosphorylates the glycogen enzymes. What is the result?',
+      'Glycogen phosphorylase becomes active and glycogen synthase becomes inactive',
+      ['Glycogen phosphorylase becomes inactive and glycogen synthase becomes active','Both enzymes become active','Both enzymes become inactive'],
+      'Phosphorylated phosphorylase (the "a" form) is ON. Phosphorylated synthase is OFF. Breakdown goes up while synthesis shuts down.'),
+    S('Glycolysis switch','FBPase-2 ON, F2,6BP down','Enzyme regulation',
+      'PKA phosphorylates the bifunctional enzyme. What follows?',
+      'FBPase-2 activity wins, F2,6BP falls, PFK-1 loses its activator, glycolysis ↓ and gluconeogenesis ↑',
+      ['PFK-2 activity wins, F2,6BP rises, glycolysis ↑','FBPase-2 activity wins, F2,6BP rises, gluconeogenesis ↓','Nothing, because the bifunctional enzyme is not regulated by phosphorylation'],
+      'Phosphorylation switches the enzyme to FBPase-2, which breaks F2,6BP back down to F6P. With less F2,6BP, PFK-1 slows and FBPase-1 is released from inhibition.'),
+    S('Pyruvate kinase','Liver PK phosphorylated, OFF','Enzyme regulation',
+      'PKA also acts on liver pyruvate kinase. What happens, and why does it make sense?',
+      'It is phosphorylated and inactivated, so PEP is not burned back to pyruvate while the liver is making glucose',
+      ['It is phosphorylated and activated to make more ATP','F1,6BP inhibits it as feedback','Insulin activates it, and that wins during fasting'],
+      'PKA phosphorylation turns liver PK OFF. F1,6BP normally activates PK (a feed-forward signal), and insulin is low in a fast. Turning PK off stops PEP from cycling back to pyruvate, which would waste energy against PEPCK.'),
+    S('Glucokinase','Glucokinase held in nucleus','Enzyme regulation',
+      'Why is glucokinase (hexokinase IV) inactive during fasting?',
+      'Low glucose lets a regulatory protein hold it in the nucleus',
+      ['G6P inhibits it','PKA phosphorylates it','It is degraded by the proteasome'],
+      'Glucokinase is not inhibited by G6P. It is sequestered in the nucleus by a regulatory protein when glucose is low and released when glucose rises.'),
+    S('Exit','Glucose leaves the liver','Pathway output',
+      'The liver is making glucose 6-phosphate from glycogen and from gluconeogenesis. What lets free glucose leave the cell?',
+      'Glucose 6-phosphatase removes the phosphate (it sits in the ER lumen of liver and kidney cells)',
+      ['Hexokinase removes the phosphate','PEPCK removes the phosphate','Glucokinase removes the phosphate'],
+      'Both glycogen breakdown and gluconeogenesis end at G6P, and G6Pase is the shared last step. Hexokinase and glucokinase go the other way, adding phosphate.'),
+    S('Net result','Glucose output up','Putting it together',
+      'Which set best describes the liver during a fast?',
+      'Gluconeogenesis ↑, glycogen breakdown ↑, glycolysis ↓, glucose output ↑',
+      ['Gluconeogenesis ↓, glycogen breakdown ↑, glycolysis ↑, glucose output ↑','Gluconeogenesis ↑, glycogen synthesis ↑, glycolysis ↓, glucose output ↑','Gluconeogenesis ↑, glycogen breakdown ↑, glycolysis ↑, glucose output ↓'],
+      'Every switch pointed the same way: make and release glucose, stop burning it. Each wrong option flips one piece.')
+  ]},
+  insulin:{ name:'Too much insulin', blurb:'A patient with diabetes overdoses on insulin. Find out why the liver does not rescue the glucose.', steps:[
+    S('Mode','Insulin signaling dominates','Kinase and phosphatase switch',
+      'Insulin is high and glucagon is low, but blood glucose is only 42 mg/dL. Which signal does the liver follow?',
+      'Insulin signaling wins: PP1 is active and enzymes are dephosphorylated, even though blood glucose is low',
+      ['The liver senses the low glucose and overrides insulin on its own','Glucagon signaling continues through PKA','Epinephrine automatically takes over the liver'],
+      'The hepatocyte reads hormones, not blood glucose directly. High insulin and low glucagon put the liver in the fed program, no matter how low glucose has fallen.'),
+    S('Glycolysis switch','F2,6BP up','Enzyme regulation',
+      'What happens to the bifunctional enzyme, F2,6BP, and PFK-1?',
+      'The enzyme is dephosphorylated and acts as PFK-2, F2,6BP rises, and PFK-1 is activated',
+      ['The enzyme is phosphorylated and acts as FBPase-2, F2,6BP falls, and PFK-1 slows','F2,6BP falls because insulin activates FBPase-2','Nothing changes, because the bifunctional enzyme only responds to low glucose'],
+      'Insulin leads to dephosphorylation. The dephosphorylated bifunctional enzyme is PFK-2, so F2,6BP rises and PFK-1 turns on.'),
+    S('Pyruvate kinase','Liver PK active','Enzyme regulation',
+      'What happens to liver pyruvate kinase?',
+      'It is dephosphorylated and active, so glycolysis runs all the way to pyruvate',
+      ['It is phosphorylated and inactive','It is inhibited by F2,6BP','It is switched off because blood glucose is low'],
+      'PKA phosphorylation turns liver PK off, and without PKA activity the phosphate comes off and PK is on.'),
+    S('Gluconeogenesis','PEPCK expression down','Pathway output',
+      'Insulin also lowers PEPCK gene expression. What does that do to alanine and lactate, the usual feedstock?',
+      'They are not converted to glucose, so alanine stays elevated in the blood',
+      ['They are consumed faster and fall in the blood','They are converted to glucose faster','They are redirected into ketone bodies'],
+      'Less PEPCK means gluconeogenesis is off, so the liver stops pulling alanine out of the blood to make glucose.'),
+    S('Net result','Liver releases no glucose','Putting it together',
+      'Why does blood glucose keep falling?',
+      'The liver is burning glucose, storing glycogen, and not making glucose, so it releases none',
+      ['The liver is breaking down glycogen too fast','Muscle is releasing glucose into the blood','Glucagon is blocking glucose uptake in the liver'],
+      'Every switch pointed toward the fed program. The liver, the main supplier of blood glucose, has been switched off.'),
+    S('Treatment','Glucagon flips the liver','Putting it together',
+      'Which treatment fits best?',
+      'Glucagon (and glucose): it flips the liver to cAMP and PKA, and glucose gives fuel right away',
+      ['More insulin','A high-fat meal, because fat becomes glucose','Inhibit pyruvate kinase to slow glycolysis'],
+      'Glucagon restarts glycogen breakdown and gluconeogenesis. Fatty acids cannot be converted to glucose. Inhibiting PK would not switch on glucose output.')
+  ]},
+  stress:{ name:'Stress (epinephrine)', blurb:'You spot an alligator. Compare what liver and muscle each do with the same hormone.', steps:[
+    S('Trigger','Epinephrine released','Hormone and receptor',
+      'You spot an alligator on a walk. Which hormone surges?',
+      'Epinephrine from the adrenal medulla',
+      ['Insulin from beta cells','Glucagon from alpha cells','Aldosterone from the adrenal cortex'],
+      'The stress response releases epinephrine. It acts like glucagon on the liver, plus it acts on muscle.'),
+    S('Receptor','Gs GPCR, cAMP up','Hormone and receptor',
+      'Epinephrine binds the beta-adrenergic receptor. What is the receptor type and the first signal inside the cell?',
+      'Gs-coupled GPCR, and cAMP rises',
+      ['Receptor tyrosine kinase, and Tyr residues autophosphorylate','Gi-coupled GPCR, and cAMP falls','Ligand-gated channel, and Na⁺ rushes in'],
+      'The beta-adrenergic receptor is the classic Gs GPCR example: G protein, adenylyl cyclase, cAMP, PKA.'),
+    S('Liver','Liver releases glucose','Pathway output',
+      'What does the liver do in response?',
+      'Glycogen phosphorylase is active, glycogen is broken down, and free glucose is released to the blood',
+      ['Glycogen synthesis goes up to store the energy','Glycolysis goes up so the liver can burn glucose','The liver pulls glucose out of the blood'],
+      'The liver is the blood glucose supplier. It breaks down glycogen, trims G6P to glucose with G6Pase, and exports it for the muscles and brain.'),
+    S('Muscle','Muscle keeps its glucose','Pathway output',
+      'Muscle glycogen is also broken down. Why does that muscle glucose not raise blood glucose?',
+      'Muscle lacks glucose 6-phosphatase, so G6P stays inside and feeds muscle glycolysis',
+      ['Muscle lacks glycogen phosphorylase','Muscle makes glucose by gluconeogenesis and exports it','Muscle glycogen cannot be broken down at all'],
+      'Muscle has phosphorylase but no G6Pase (and no gluconeogenesis machinery), so its glucose stays local for its own ATP.'),
+    S('Net result','Fuel for fight or flight','Putting it together',
+      'Which set best describes the whole-body response?',
+      'Liver glucose output ↑ for muscle and brain, and muscle glycolysis ↑ for contraction',
+      ['Liver stores glycogen while muscle makes glucose by gluconeogenesis','Both liver and muscle release glucose into the blood','Insulin-driven activation of glycogen synthase in liver and muscle'],
+      'Same hormone, different jobs. The liver exports glucose. Muscle burns what it has.')
+  ]}
+};
+
+/* ================= DATA: pathways for "Block it" =================
+   mets[i] -> enz[i] -> mets[i+1]. Blocking enz[e] makes mets 0..e go up
+   and mets e+1.. go down. extraAll / extras add side effects.
+   comp adds a follow-up question about how the cell copes.            */
+const PATHS = [
+ { id:'glyc', name:'Glycolysis', blurb:'Glucose to pyruvate in the cytosol.',
+   mets:['Glucose','G6P','F6P','F1,6BP','G3P / DHAP','1,3BPG','3PG','2PG','PEP','Pyruvate'],
+   enz:['Hexokinase / glucokinase','PGI','PFK-1','Aldolase + TPI','GAPDH','PGK','Phosphoglycerate mutase','Enolase','Pyruvate kinase'],
+   extraAll:[['Net ATP yield',-1],['NADH made',-1]],
+   notes:{
+     'Hexokinase / glucokinase':'Glucose cannot be trapped in the cell, so nothing downstream gets fed.',
+     'PFK-1':'This is the committed step. In muscle, a PFK-1 defect causes cramps during hard exercise because ATP cannot be made fast enough. F6P and G6P pile up.',
+     'GAPDH':'GAPDH needs NAD+ and makes NADH, so the payoff phase stalls.',
+     'Pyruvate kinase':'PEP piles up. Red blood cells have no mitochondria, so they depend fully on glycolysis and can lyse when ATP runs short.'
+   },
+   comp:{
+     'Pyruvate kinase':R('Coping with the block','Pyruvate kinase is blocked. Why do red cells suffer much more than muscle?',[
+       ['Red cells have no mitochondria and no other ATP source, while muscle uses a different isoform and can also use oxidative phosphorylation','Red cells depend entirely on glycolysis. Muscle has a different pyruvate kinase isoform and mitochondria.'],
+       ['Red cells make more NADPH than muscle','NADPH is not what limits ATP here.'],
+       ['Muscle does not use glycolysis','Muscle uses glycolysis heavily during hard exercise.'],
+       ['Red cells store less glycogen than muscle','Glycogen stores would not rescue a block at the last step.']])
+   }},
+ { id:'gng', name:'Gluconeogenesis', blurb:'Pyruvate or lactate back to blood glucose in the liver.',
+   mets:['Pyruvate / lactate','OAA','PEP','F1,6BP','F6P','G6P','Blood glucose'],
+   enz:['Pyruvate carboxylase','PEPCK','Shared reversible enzymes (enolase to aldolase)','FBPase-1','PGI','Glucose 6-phosphatase'],
+   extras:{'Glucose 6-phosphatase':[['Liver glycogen',1],['Lactate (glycolysis takes the overflow)',1]]},
+   notes:{
+     'Pyruvate carboxylase':'Needs biotin, ATP, and bicarbonate, and acetyl-CoA activates it. Fasting hypoglycemia with lactate and pyruvate pileup is the classic picture.',
+     'PEPCK':'PEPCK uses GTP. Lactate and alanine (the feedstock) back up and fasting glucose falls.',
+     'Glucose 6-phosphatase':'The last step is shared with glycogen breakdown, so G6P piles up and gets pushed into glycogen and glycolysis. That gives hypoglycemia, a big liver, and lactic acidosis.'
+   },
+   comp:{
+     'Pyruvate carboxylase':R('Coping with the block','Pyruvate carboxylase is blocked in a fasting child. Which substrate could still raise blood glucose?',[
+       ['Glycerol','It enters as DHAP, after the blocked step.'],
+       ['Lactate','It must become pyruvate and then pass through pyruvate carboxylase.'],
+       ['Alanine','It becomes pyruvate and then needs pyruvate carboxylase too.'],
+       ['Acetyl-CoA from fat','Acetyl-CoA cannot become glucose, and it only activates the blocked enzyme.']]),
+     'FBPase-1':R('Coping with the block','FBPase-1 is blocked. Which plan fits best?',[
+       ['Avoid fasting and give frequent carbohydrate feeds','Glucose has to come from the diet because the liver cannot make it.'],
+       ['A high-protein, low-carbohydrate diet','Amino acids feed gluconeogenesis, which is the blocked route.'],
+       ['Give insulin','Insulin lowers blood glucose further.'],
+       ['Give biotin','Biotin helps pyruvate carboxylase, not FBPase-1.']]),
+     'Glucose 6-phosphatase':R('Coping with the block','Glucose 6-phosphatase is blocked. Where does the extra G6P go?',[
+       ['Into glycogen and glycolysis, giving a large liver and lactic acidosis','Those are the two routes still open for G6P.'],
+       ['Out of the cell as glucose phosphate','G6P cannot cross the membrane, which is why the phosphatase is needed.'],
+       ['Into gluconeogenesis for more glucose','That route also ends at G6Pase, so it is blocked too.'],
+       ['Into fatty acid oxidation','G6P is a sugar phosphate, not a fat-oxidation substrate.']])
+   },
+   foot:'Lactate from muscle (Cori cycle) and alanine both enter at the pyruvate end.'},
+ { id:'gbreak', name:'Glycogen breakdown (liver)', blurb:'Glycogen to free glucose.',
+   mets:['Glycogen','G1P','G6P','Glucose (released)'],
+   enz:['Glycogen phosphorylase','Phosphoglucomutase','Glucose 6-phosphatase'],
+   extras:{'Glucose 6-phosphatase':[['Lactate (glycolysis takes the overflow)',1]]},
+   notes:{
+     'Glycogen phosphorylase':'In muscle the same block (McArdle disease) causes exercise cramps and no lactate rise, because muscle glycogen cannot feed glycolysis.',
+     'Glucose 6-phosphatase':'G6P cannot be trimmed, so it cannot leave the cell and it gets diverted down other routes.'
+   },
+   comp:{
+     'Glycogen phosphorylase':R('Coping with the block','In muscle, the same block causes cramps with exercise. What do you expect in blood after hard exercise?',[
+       ['Little or no rise in lactate','Muscle glycogen cannot feed glycolysis, so less lactate is made.'],
+       ['A large rise in lactate','Lactate comes from glycolysis, which is starved here.'],
+       ['A rise in blood glucose','Muscle has no glucose 6-phosphatase and cannot release glucose.'],
+       ['A rise in ketones','Ketone production is a liver process and is not tied to this block.']])
+   }},
+ { id:'gsyn', name:'Glycogen synthesis', blurb:'Glucose to glycogen after a meal.',
+   mets:['Glucose','G6P','G1P','UDP-glucose','Glycogen'],
+   enz:['Glucokinase','Phosphoglucomutase','UDP-glucose pyrophosphorylase','Glycogen synthase'],
+   notes:{
+     'Glucokinase':'Liver cells cannot trap glucose after a meal, so blood glucose stays high.',
+     'Glycogen synthase':'UDP-glucose backs up because nothing can extend the chain. Synthase uses UDP-glucose and builds alpha(1→4) links.'
+   }},
+ { id:'tca', name:'TCA cycle (one lap)', blurb:'Citrate around to oxaloacetate.',
+   mets:['Citrate','Isocitrate','α-KG','Succinyl-CoA','Succinate','Fumarate','Malate','OAA'],
+   enz:['Aconitase','Isocitrate DH','α-KG DH complex','Succinyl-CoA synthetase','Succinate DH','Fumarase','Malate DH'],
+   extraAll:[['Overall ATP yield',-1]],
+   extras:{
+     'Isocitrate DH':[['NADH made',-1]],
+     'α-KG DH complex':[['NADH made',-1]],
+     'Succinyl-CoA synthetase':[['GTP made',-1]],
+     'Succinate DH':[['FADH2 made',-1]],
+     'Malate DH':[['NADH made',-1]]
+   },
+   notes:{
+     'Aconitase':'Citrate piles up, and the cycle stalls early.',
+     'α-KG DH complex':'Same cofactor set as the PDH complex: TPP, lipoate, CoA, FAD, and NAD+.',
+     'Succinate DH':'This enzyme is also Complex II of the electron transport chain, so the TCA cycle and respiration both take the hit.'
+   },
+   comp:{
+     'α-KG DH complex':R('Coping with the block','A mutation in the E3 subunit blocks this complex. Which other complex is hit by the same mutation?',[
+       ['The PDH complex','Both complexes share the same E3 subunit (dihydrolipoyl dehydrogenase).'],
+       ['Citrate synthase','A single condensation enzyme with no lipoamide or E3.'],
+       ['Succinate dehydrogenase','Uses FAD, but has no lipoamide or E3 subunit.'],
+       ['Isocitrate dehydrogenase','Makes NADH, but has no lipoamide or E3 subunit.']]),
+     'Succinate DH':R('Coping with the block','Succinate dehydrogenase is blocked. What else is lost?',[
+       ['Complex II of the electron transport chain, because it is the same enzyme','SDH is Complex II, so electrons from succinate and FADH2 cannot enter the chain there.'],
+       ['Complex I activity','Complex I oxidizes NADH and is a separate enzyme.'],
+       ['Complex IV activity','Complex IV acts at the end of the chain and is not part of SDH.'],
+       ['ATP synthase activity','ATP synthase is a separate machine driven by the proton gradient.']])
+   },
+   foot:'This is a one-lap view of the metabolites around the block. In a real cycle, everything eventually backs up or runs dry.'},
+ { id:'pdh', name:'Pyruvate into the TCA cycle', blurb:'Pyruvate to acetyl-CoA to citrate.',
+   mets:['Pyruvate','Acetyl-CoA','Citrate'],
+   enz:['PDH complex','Citrate synthase'],
+   extraAll:[['Overall ATP yield',-1]],
+   extras:{'PDH complex':[['Lactate',1],['Alanine',1],['NADH made by PDH',-1]]},
+   notes:{
+     'PDH complex':'Pyruvate cannot become acetyl-CoA, so it is pushed to lactate and alanine. Ketones stay low.',
+     'Citrate synthase':'Acetyl-CoA backs up and citrate falls.'
+   },
+   comp:{
+     'PDH complex':R('Coping with the block','The PDH complex is blocked. Which reaction can partly compensate?',[
+       ['Pyruvate carboxylase makes oxaloacetate from the pyruvate that backs up, which replenishes TCA intermediates','This feeds the TCA cycle without needing PDH.'],
+       ['Pyruvate to lactate','This is already happening and does not make ATP or feed the TCA cycle.'],
+       ['Pyruvate to alanine','Also already happening, and it does not feed the TCA cycle.'],
+       ['Oxidation of acetyl-CoA to CO2','Acetyl-CoA is exactly what is missing.']])
+   }},
+ { id:'etc', name:'Electron transport chain', blurb:'NADH to oxygen through Complexes I, III, and IV.',
+   mets:['NADH','QH2 (reduced Q)','Cytochrome c (reduced)','O2 used'],
+   enz:['Complex I','Complex III','Complex IV'],
+   extraAll:[['NADH/NAD+ ratio',1],['Proton gradient',-1],['ATP made',-1],['Lactate (anaerobic glycolysis)',1]],
+   extras:{'Complex III':[['Succinate',1]],'Complex IV':[['Succinate',1]]},
+   notes:{
+     'Complex III':'QH2 cannot be oxidized, so the Q pool stays reduced and even Complex II backs up, which is why succinate piles up.',
+     'Complex IV':'Electrons cannot reach oxygen, so cytochrome c stays reduced and an uncoupler like DNP cannot restore oxygen use.'
+   },
+   comp:{
+     'Complex III':R('Coping with the block','Complex III is partly blocked in muscle. Which pathway does the cell lean on?',[
+       ['Anaerobic glycolysis, with LDH regenerating NAD+','Glycolysis makes ATP without the chain, and LDH reoxidizes NADH, so lactate rises.'],
+       ['Fatty acid synthesis','It uses ATP and NADPH and does not make ATP.'],
+       ['Gluconeogenesis','Muscle lacks the machinery, and it costs ATP.'],
+       ['Ketogenesis','A liver pathway, not a muscle one.']]),
+     'Complex IV':R('Coping with the block','Complex IV is blocked and oxygen is plentiful. Why is lactate still high?',[
+       ['Electrons cannot reach oxygen, so the cell relies on glycolysis and LDH to regenerate NAD+','Oxygen is present but unusable, so the cell behaves as if it were anaerobic.'],
+       ['Complex I is inhibited','A Complex I block would not leave cytochrome c reduced.'],
+       ['ATP synthase is damaged','That would raise the gradient, not collapse it.'],
+       ['The malate-aspartate shuttle is nonfunctional','The shuttle depends on the chain, but it is not the cause of the block.']]),
+     'Complex I':R('Coping with the block','Why is a Complex I block milder than a block at Complex III?',[
+       ['Complex II can still feed electrons from succinate and FADH2 into Q','Q can still be reduced through Complex II, so the chain keeps running.'],
+       ['Complex I pumps more protons than Complex III','Complex I pumps protons, but that does not make its loss milder.'],
+       ['Complex IV can take electrons directly from NADH','Complex IV only accepts electrons from cytochrome c.'],
+       ['Glycolysis fully replaces the chain','Glycolysis makes much less ATP than the chain.']])
+   },
+   foot:'Complex II can still feed electrons into Q from succinate, so a Complex I block is milder than a block at III or IV.'},
+ { id:'ppp', name:'Pentose phosphate (oxidative)', blurb:'G6P to ribose 5-phosphate, making NADPH.',
+   mets:['G6P','6-phosphoglucono-δ-lactone','6-phosphogluconate','Ribulose 5-P','Ribose 5-P'],
+   enz:['G6PD','Lactonase','6-phosphogluconate DH','Isomerase'],
+   extras:{
+     'G6PD':[['NADPH',-1],['Reduced glutathione (GSH)',-1],['Peroxide left unneutralized',1]],
+     'Lactonase':[['NADPH',-1]],
+     '6-phosphogluconate DH':[['NADPH',-1]]
+   },
+   notes:{
+     'G6PD':'Red blood cells depend on this pathway for NADPH, so oxidative stress (infection, fava beans, some drugs) causes hemolysis.'
+   },
+   comp:{
+     'G6PD':R('Coping with the block','Why does G6PD deficiency hit red cells much harder than other cells?',[
+       ['Red cells rely on this pathway for nearly all their NADPH, while other cells have backup sources','Without NADPH, glutathione stays oxidized and peroxide damages the cell.'],
+       ['Other cells do not use glutathione','All cells use glutathione to handle peroxide.'],
+       ['Red cells make no ATP, so they cannot repair damage','Red cells make ATP by glycolysis, and glycolysis is normal here.'],
+       ['Red cells have too much glycolytic flux','Glycolytic ATP production is normal in G6PD deficiency.']])
+   },
+   foot:'The non-oxidative reactions can still make some ribose 5-phosphate from glycolytic intermediates, so cells are not completely out.'}
+];
+
+/* ================= DATA: cases (Find the fault) =================
+   Each case: vignette + lab chips (some are key clues) + exam-style questions
+   where every option carries its own reason.                              */
+const CASES = [
+ { id:'pk', title:'Child with pallor and jaundice',
+   vignette:'A 3-year-old boy is pale, tires easily, and has mild jaundice. A blood smear shows spiculated red cells. He has no recent infection or new medicine, and no sign of iron deficiency or a hemoglobin disorder. Enzyme testing of his red cells later shows a defect in one glycolytic enzyme.',
+   labs:[
+     lab('Hemoglobin',-1,false,'Shows anemia, but not which pathway failed.'),
+     lab('Reticulocytes',1,false,'The marrow is replacing lost cells. It tells you red cells die early, not why.'),
+     lab('Indirect bilirubin',1,false,'A breakdown product of hemoglobin. It fits hemolysis but does not locate the defect.'),
+     lab('Serum LDH',1,false,'Leaks out of lysed cells. It supports hemolysis, nothing more.'),
+     lab('Red cell ATP',-1,true,'Red cells have no mitochondria, so glycolysis is their only ATP source. Low ATP points straight at a glycolysis block.'),
+     lab('Red cell PEP',1,true,'PEP is the substrate right before pyruvate kinase, so it backs up behind a block at that step.'),
+     lab('Muscle ATP','normal',false,'Useful later, because it shows the defect spares muscle. It does not locate the block.')
+   ],
+   qs:[
+     R('Why red cells break','Which statement best explains why his red cells break down early?',[
+       ['ATP falls, so ion pumps and membrane upkeep fail','Red cells have no mitochondria, so glycolysis is their only ATP source. Without ATP they cannot hold ion gradients or cell shape.'],
+       ['Oxidative phosphorylation overloads the cell','Red cells have no mitochondria, so they do no oxidative phosphorylation at all.'],
+       ['Extra NADPH damages the membrane','NADPH protects against oxidative damage. It is not the problem here.'],
+       ['PEP is directly toxic to the membrane','PEP backs up behind the block, but the damage comes from missing ATP, not from PEP itself.'],
+       ['Lactate overproduction acidifies the cell','A block at pyruvate kinase lowers pyruvate, so lactate production would fall, not rise.']]),
+     R('Tissue difference','His muscle ATP is normal. Which explanation fits best?',[
+       ['Muscle uses a different pyruvate kinase isoform, encoded by a different gene','Red cells and liver use the PKLR isoform. Muscle uses PKM, so the mutation spares it.'],
+       ['Muscle makes ATP only by oxidative phosphorylation','Muscle relies heavily on glycolysis, especially in hard exercise.'],
+       ['Muscle lacks phosphofructokinase','Muscle has PFK-1, and losing it would shut glycolysis down.'],
+       ['Muscle does not need ATP to contract','Contraction is one of the biggest ATP demands in the body.'],
+       ['Muscle burns glucose 6-phosphate directly in oxidative phosphorylation','G6P goes through glycolysis first. Oxidative phosphorylation runs on NADH and FADH2, not sugar phosphates.']]),
+     R('Predict a drug effect','A drug that activates PFK-1 is tested in his red cells. What do you expect?',[
+       ['PEP and the intermediates before it rise further, with no gain in ATP','More flux pushes more material into the same bottleneck, and pyruvate kinase still limits ATP.'],
+       ['ATP rises because glycolysis speeds up','Speeding up steps before a block cannot raise the output of the blocked step.'],
+       ['Lactate rises because pyruvate is made faster','Pyruvate is still limited by the block, so lactate does not rise.'],
+       ['NADPH falls because G6P is diverted','PFK-1 activity does not drive the pentose phosphate pathway, so this is not the effect.'],
+       ['No metabolite changes at all','Metabolites before the block shift when flux changes.']]),
+     R('Validate the therapy','A gene therapy restores pyruvate kinase in his red cells. Which result best shows it worked?',[
+       ['Reticulocyte count and bilirubin fall as red cells survive longer','Longer red cell survival means less hemolysis, so the marrow and bilirubin settle down.'],
+       ['PEP rises and ATP falls','That is the disease pattern, not recovery.'],
+       ['Hexokinase and PFK-1 expression rise','Upstream enzymes do not fix a block at the last step.'],
+       ['Serum LDH rises','Rising LDH means more red cell lysis, the opposite of recovery.'],
+       ['Glycogen storage rises','Unrelated to the defect.']])
+   ]},
+ { id:'pc', title:'Drowsy child after an overnight fast',
+   vignette:'A 5-year-old becomes drowsy and confused after an overnight stomach illness with almost no food. Her blood glucose is very low. Liver mitochondria look normal under the microscope.',
+   labs:[
+     lab('Blood glucose',-1,false,'Fits many gluconeogenesis defects, so it does not single one out.'),
+     lab('Lactate',1,false,'Rises when pyruvate backs up. Many defects do this.'),
+     lab('Alanine',1,false,'Also rises when pyruvate backs up. Many defects do this.'),
+     lab('Pyruvate',1,false,'Backs up behind a block, but this alone does not tell you where.'),
+     lab('Liver OAA',-1,true,'OAA is the product of the first gluconeogenic bypass, so low OAA points at the step just before it.'),
+     lab('Response to biotin','improves',true,'Biotin is the cofactor of pyruvate carboxylase, so a biotin response points to that enzyme.')
+   ],
+   qs:[
+     R('Lactate and alanine','Why are lactate and alanine high in this girl?',[
+       ['Pyruvate cannot be carboxylated to oxaloacetate, so it backs up and is shunted to lactate and alanine','Pyruvate carboxylase is blocked, so the excess pyruvate goes to lactate (LDH) and alanine (transamination).'],
+       ['The Cori cycle is running faster','The Cori cycle returns lactate to glucose in the liver, which needs working gluconeogenesis. It cannot be the cause.'],
+       ['Glucose 6-phosphatase is overactive','That would raise glucose and does not touch pyruvate.'],
+       ['PDH activity is increased','More PDH would drain pyruvate into acetyl-CoA and lower lactate.'],
+       ['Glycolytic flux is decreased','Less glycolysis would make less pyruvate and less lactate.']]),
+     R('Biotin','Which enzyme does the biotin directly act on?',[
+       ['Pyruvate carboxylase','Biotin is a covalently bound cofactor of pyruvate carboxylase, working with ATP and bicarbonate.'],
+       ['PEP carboxykinase','PEPCK uses GTP and does not need biotin.'],
+       ['Glucose 6-phosphatase','A hydrolase with no biotin requirement.'],
+       ['Fructose 1,6-bisphosphatase','Also a hydrolase, with no biotin requirement.'],
+       ['Hexokinase IV','A glycolytic kinase with no biotin requirement.']]),
+     MR('Select all that apply','Which of these can enter gluconeogenesis without first being converted to pyruvate?',[
+       ['Lactate',false,'Lactate is oxidized to pyruvate by LDH first.'],
+       ['Glycerol',true,'Glycerol becomes DHAP, which joins the pathway at the triose phosphate level.'],
+       ['Alanine',false,'Alanine is transaminated to pyruvate first.'],
+       ['Oxaloacetate',true,'OAA is the product of pyruvate carboxylase, so it is already past the pyruvate step.']]),
+     R('Which still works','Which substrate could still raise this girl\'s blood glucose?',[
+       ['Glycerol','It enters as DHAP, after the blocked step.'],
+       ['Lactate','It must become pyruvate and then pass through pyruvate carboxylase.'],
+       ['Alanine','It becomes pyruvate and needs pyruvate carboxylase too.'],
+       ['Pyruvate','It is the substrate that is stuck behind the block.'],
+       ['Acetyl-CoA from fat','Acetyl-CoA cannot become glucose, and it only activates the blocked enzyme.']])
+   ]},
+ { id:'fbp', title:'Two volunteers, one long fast',
+   vignette:'Two volunteers fast for 36 hours. Volunteer A keeps a normal blood glucose. Volunteer B has an inherited enzyme defect and develops hypoglycemia by hour 24.',
+   labs:[
+     lab('A: blood glucose','normal',false,'Fine for A, but A is the comparison. The question is about B.'),
+     lab('A: insulin',-1,false,'Expected in a fast.'),
+     lab('A: glucagon',1,false,'Expected in a fast.'),
+     lab('A: liver PEPCK and G6Pase',1,false,'A is adapting normally by upregulating gluconeogenic enzymes.'),
+     lab('B: blood glucose',-1,false,'Fits many gluconeogenesis defects, so it does not single one out.'),
+     lab('B: lactate',1,true,'Lactate backs up when gluconeogenesis cannot use it.'),
+     lab('B: liver F1,6BP',1,true,'F1,6BP piling up means the step right after it is blocked.')
+   ],
+   qs:[
+     R('Lactic acidosis','Which statement best explains Volunteer B\'s lactic acidosis?',[
+       ['The step from F1,6BP to F6P is blocked, so intermediates and lactate back up','Gluconeogenic intermediates, including lactate, cannot move toward glucose past this step.'],
+       ['Pyruvate kinase is more active','PK is a glycolytic step, and glucagon would inhibit it in a fast. It would not explain the low glucose.'],
+       ['Glycerol kinase is less active','That only limits glycerol entry and would not cause lactic acidosis.'],
+       ['Muscle takes up more glucose','Uptake is driven by insulin, which is low during a fast.'],
+       ['The F1,6BP step itself makes lactate','That step makes F6P, not lactate. Lactate rises because it cannot be converted onward.']]),
+     R('Staying normal','How does Volunteer A keep glucose normal at hour 36?',[
+       ['Gluconeogenic enzymes such as PEPCK and G6Pase are upregulated','Glucagon raises their expression, so the liver makes glucose from alanine, glycerol, and lactate.'],
+       ['Liver glycolysis increases','Glycolysis burns glucose and would lower the supply.'],
+       ['Muscle glycogen is broken down and released','Muscle has no glucose 6-phosphatase and cannot release glucose.'],
+       ['Insulin secretion increases','Insulin is low during fasting.'],
+       ['Alanine transamination decreases','Alanine is a gluconeogenic feedstock, so its conversion rises.']]),
+     R('Glycerol','Why is glycerol an especially efficient gluconeogenic substrate in a long fast?',[
+       ['It enters as DHAP, so it skips the mitochondrial steps (pyruvate carboxylase and PEPCK)','Glycerol joins at the triose level, past the first bypass.'],
+       ['It bypasses all of the glycolytic steps','It still uses the reversible glycolytic enzymes after DHAP.'],
+       ['It produces more ATP than pyruvate','ATP yield is not the reason.'],
+       ['It is converted directly to glucose','It takes several steps, not one.'],
+       ['It is metabolized only in muscle','The liver has glycerol kinase and makes the glucose.']]),
+     R('Therapy','Which plan best manages Volunteer B?',[
+       ['Avoid fasting and give frequent glucose or carbohydrate feeds','The liver cannot make glucose from precursors, so glucose must come from the diet.'],
+       ['A high-protein, low-carbohydrate diet','Amino acids feed gluconeogenesis, which is blocked at this step.'],
+       ['Insulin','Insulin would lower blood glucose further.'],
+       ['Biotin','Biotin helps pyruvate carboxylase, not FBPase-1.'],
+       ['Activate pyruvate kinase','It would not unblock the step and would only burn more glucose.']])
+   ]},
+ { id:'pdh', title:'Child with lactic acidosis and delay',
+   vignette:'A 6-year-old has developmental delay and vomiting that worsen during infections and fasting. Enzyme assays on her cells are done on the pyruvate dehydrogenase complex.',
+   labs:[
+     lab('Lactate',1,false,'Also fits many mitochondrial defects.'),
+     lab('Pyruvate',1,false,'Backs up behind several blocks.'),
+     lab('Alanine',1,false,'Also fits many defects that raise pyruvate.'),
+     lab('Ketones',-1,false,'Shows that acetyl-CoA from fat is not being overproduced.'),
+     lab('Blood pH','7.28 (acidotic)',false,'Follows from the lactate.'),
+     lab('E1 and E2 activity','normal',true,'Rules out the first two steps, so the failure is in the third subunit.'),
+     lab('E3 activity',-1,true,'E3 is the third subunit, which reoxidizes lipoamide.'),
+     lab('Urine lipoic acid derivatives',1,true,'Lipoic acid cannot be reoxidized, so reduced forms build up and spill into urine.')
+   ],
+   qs:[
+     R('Lactate','Which statement best explains her high lactate?',[
+       ['Pyruvate cannot be converted to acetyl-CoA, so it backs up and is converted to lactate','The PDH complex is stalled, so pyruvate is pushed toward LDH.'],
+       ['Gluconeogenesis is increased','Gluconeogenesis would consume lactate and lower it.'],
+       ['Fatty acid oxidation is increased','That would raise ketones and acetyl-CoA, but ketones are low.'],
+       ['Glycolytic flux is decreased','Less glycolysis would lower lactate.'],
+       ['Pyruvate kinase is more active','More PK would raise pyruvate, but the defect is at E3, so it is not the best explanation.']]),
+     R('Mitochondria','Which change do you expect in her mitochondria?',[
+       ['Less NADH is made, because lipoamide cannot be reoxidized to pass electrons to NAD+','E3 passes electrons from reduced lipoamide through FAD to NAD+. Without it, the complex stalls.'],
+       ['More acetyl-CoA is made','The complex stalls, so acetyl-CoA from pyruvate falls.'],
+       ['More citrate is made','Less acetyl-CoA means less citrate synthesis.'],
+       ['More ketogenesis','Ketones are low in this patient.'],
+       ['More ATP is made','Less NADH and less TCA flux mean less ATP.']]),
+     R('Shared subunit','The same E3 subunit is used by another complex. Which one?',[
+       ['α-Ketoglutarate dehydrogenase complex','It uses the same E1-E2-E3 architecture with lipoamide, FAD, and NAD+, and shares the same E3.'],
+       ['Citrate synthase','A single condensation enzyme with no lipoamide or E3.'],
+       ['Isocitrate dehydrogenase','Makes NADH, but has no lipoamide or E3.'],
+       ['Succinate dehydrogenase','Uses FAD, but has no lipoamide or E3.'],
+       ['Succinyl-CoA synthetase','Does substrate-level phosphorylation and has no E3.']]),
+     R('Compensation','Which reaction could partly compensate for the impaired PDH complex?',[
+       ['Carboxylation of pyruvate to oxaloacetate','Pyruvate carboxylase uses the backed-up pyruvate to replenish TCA intermediates.'],
+       ['Conversion of pyruvate to lactate','Already happening, and it does not feed the TCA cycle.'],
+       ['Transamination of pyruvate to alanine','Already happening, and it does not feed the TCA cycle.'],
+       ['Oxidation of acetyl-CoA to CO2','Acetyl-CoA is exactly what is missing.'],
+       ['Conversion of citrate to isocitrate','This is a normal TCA step and does not bypass the PDH block.']]),
+     R('Riboflavin','Riboflavin supplements do not help her. Why?',[
+       ['FAD is not the limiting factor, because the E3 enzyme itself is defective','Riboflavin makes FAD, but more cofactor cannot repair a broken enzyme.'],
+       ['Riboflavin is not absorbed','Nothing suggests an absorption problem.'],
+       ['The PDH complex does not use FAD','E3 uses FAD as an electron carrier.'],
+       ['Riboflavin inhibits PDH kinase','Not a feature of riboflavin.'],
+       ['Riboflavin is degraded in mitochondria','Not a feature of riboflavin handling.']])
+   ]},
+ { id:'c3', title:'Teen with cramps after exercise',
+   vignette:'A 16-year-old has cramps, fatigue, and mild neurological symptoms that worsen with illness or fasting. A muscle biopsy is sent for electron transport chain assays. Genetic testing finds a mitochondrial DNA variant.',
+   labs:[
+     lab('Lactate after exercise',1,false,'Fits many respiratory chain defects.'),
+     lab('Pyruvate','normal',false,'Does not point to the chain.'),
+     lab('Blood glucose','normal',false,'Rules out a gluconeogenesis defect, but does not locate the block.'),
+     lab('Ketones',-1,false,'Shows this is not a fat-oxidation problem.'),
+     lab('Oxygen use at rest','normal',false,'Resting demand is low, so the chain can still keep up.'),
+     lab('NADH/NAD+ ratio',1,true,'NADH is not being oxidized, so the chain is backing up.'),
+     lab('Urine succinate',1,true,'Succinate builds up when Q stays reduced and Complex II cannot pass electrons on.'),
+     lab('Complex III activity',-1,true,'Locates the block in the chain.')
+   ],
+   qs:[
+     R('Compensation','Which compensatory pathway is most likely upregulated in his muscle during exercise?',[
+       ['Anaerobic glycolysis, with LDH regenerating NAD+','Glycolysis makes ATP without the chain, and LDH reoxidizes NADH, so lactate rises.'],
+       ['Fatty acid synthesis','It consumes ATP and NADPH and does not make ATP.'],
+       ['Gluconeogenesis','Muscle lacks the machinery, and it costs ATP.'],
+       ['Citrate export','Exports carbon for fat synthesis, which does not help ATP.'],
+       ['Ketogenesis','A liver pathway, not a muscle one.']]),
+     R('Succinate','Why does succinate accumulate even though Complex II itself is normal?',[
+       ['QH2 cannot be oxidized at Complex III, so Q stays reduced and Complex II cannot pass electrons on','Complex II needs oxidized Q as its acceptor. When Q is saturated, succinate builds up.'],
+       ['Succinate dehydrogenase needs NAD+ as a cofactor','SDH uses FAD, not NAD+.'],
+       ['Complex II is unable to transfer electrons to ubiquinone','Complex II structure and function are normal.'],
+       ['Ubiquinone is oxidized too rapidly','The opposite is true. Q is overly reduced.'],
+       ['Succinate is diverted to gluconeogenesis','Muscle does not run gluconeogenesis.']]),
+     R('Rest versus exercise','Oxygen use is normal at rest but reduced after exercise. Why?',[
+       ['ATP demand exceeds the reduced capacity of the chain during exercise','At rest the chain can keep up. In exercise, demand is higher than the damaged chain can supply.'],
+       ['Oxygen is consumed only by Complex I','Oxygen is reduced at Complex IV.'],
+       ['Complex III is bypassed at rest','There is no bypass of Complex III.'],
+       ['Complex IV is inactive during exercise','Nothing suggests that Complex IV is inactive.'],
+       ['Oxygen is consumed by glycolysis','Glycolysis does not use oxygen.']]),
+     R('No bypass','Which feature most directly limits his ability to bypass Complex III?',[
+       ['There is no alternative electron acceptor downstream of ubiquinol','Cytochrome b has to be the next acceptor after QH2, so electrons cannot skip it.'],
+       ['Lack of cytosolic NAD+ regeneration','LDH regenerates NAD+ in the cytosol.'],
+       ['The inner membrane is impermeable to ubiquinol','Ubiquinol is lipid-soluble and moves within the membrane.'],
+       ['Cytochrome c is in the matrix','Cytochrome c is in the intermembrane space.'],
+       ['Complex IV oxidizes FADH2','Complex IV accepts electrons from cytochrome c.']])
+   ]},
+ { id:'c1', title:'Sprinter with fatigue and low muscle ATP', noClue:true,
+   vignette:'A 22-year-old sprinter has muscle fatigue and cramps during hard workouts. A biopsy shows reduced cristae density. Genetic testing finds a point mutation in cytochrome c1, a Complex III component. Post-exercise lactate is high and muscle ATP is low.',
+   labs:[],
+   qs:[
+     R('Redox state','Given the cytochrome c1 mutation, which carrier most likely stays reduced?',[
+       ['Ubiquinol (QH2)','It cannot pass electrons through Complex III, so it builds up in the reduced form.'],
+       ['Cytochrome c','It receives electrons from c1, so it is starved and stays oxidized.'],
+       ['Cytochrome a3','It is downstream and starved of electrons, so it stays oxidized.'],
+       ['Oxygen','Oxygen is not an electron carrier and is not reduced if electrons stop upstream.']]),
+     R('Thermodynamics','Which best describes the energy consequence of the mutation?',[
+       ['Less free energy from electron flow is captured as a proton gradient, so less is available for ATP synthase','Reduced electron flow means fewer protons pumped.'],
+       ['The standard free energy for NADH oxidation increases','A mutation does not change standard values for the reaction.'],
+       ['The reduction potential of cytochrome a3 decreases','Reduction potentials are properties of the carriers, not of this mutation.'],
+       ['Entropy in the matrix increases','Not the relevant consequence.'],
+       ['The E°\' difference between NADH and O2 shrinks','That difference is fixed by the carriers, not by a point mutation.']]),
+     R('Survival','Why can he still function despite the Complex III defect?',[
+       ['The point mutation reduces Complex III activity but does not abolish it, and glycolysis adds extra ATP','Residual chain flow plus lactate-producing glycolysis keeps ATP above the survival threshold.'],
+       ['Complex II bypasses Complex III by reducing cytochrome c','Complex II reduces Q, not cytochrome c.'],
+       ['Complex I can directly reduce cytochrome c','Complex I reduces Q, not cytochrome c.'],
+       ['Complex IV pumps more protons to compensate','Complex IV cannot raise its pumping to make up the loss.'],
+       ['Glycolysis alone supplies all the ATP he needs','Glycolysis makes far less ATP than the chain, which is why he tires.']])
+   ]},
+ { id:'c4', title:'Farmer who collapses in the field',
+   vignette:'A 45-year-old farmer collapses in the field with muscle weakness, confusion, and labored breathing. He recently started using a new pesticide. Studies on his isolated mitochondria follow.',
+   labs:[
+     lab('Blood lactate',1,false,'Fits many respiratory chain defects.'),
+     lab('ATP',-1,false,'Fits many chain defects.'),
+     lab('Oxygen consumption',-1,false,'Shows the chain is running slowly, but not where.'),
+     lab('Complex I and II activity','normal',false,'Rules out the first complexes, but does not say where the block is.'),
+     lab('Proton gradient',-1,false,'Follows from any chain block.'),
+     lab('Cytochrome c','accumulates reduced',true,'Cytochrome c is being reduced but cannot hand electrons on, so the block is just downstream.'),
+     lab('Effect of DNP','oxygen use not restored',true,'An uncoupler speeds up a working chain. If it fails, electrons cannot reach oxygen at all.')
+   ],
+   qs:[
+     R('Reduced cytochrome c','Which best explains the accumulation of reduced cytochrome c?',[
+       ['Inhibition of Complex IV','Cytochrome c cannot hand its electrons to Complex IV, so it stays reduced.'],
+       ['Inhibition of Complex I','Cytochrome c would be more oxidized, because fewer electrons reach it.'],
+       ['Inhibition of ATP synthase','The gradient would build up and the chain would slow, but cytochrome c would not accumulate in reduced form.'],
+       ['Uncoupling of oxidative phosphorylation','Uncoupling raises oxygen use and keeps cytochrome c oxidized.'],
+       ['Deficiency in NADH shuttles','Shuttle problems raise cytosolic NADH but do not trap cytochrome c.']]),
+     R('DNP','Why does DNP fail to restore oxygen consumption?',[
+       ['Complex IV is blocked, so electrons cannot flow even without a gradient','DNP removes the gradient, but electrons still have to reach oxygen at Complex IV.'],
+       ['DNP inhibits Complex I','DNP does not inhibit Complex I.'],
+       ['ATP synthase is irreversibly inhibited','That would not stop an uncoupler from speeding electron flow.'],
+       ['The proton gradient is already gone','True, but that is not why oxygen use stays low. The block is the cause.'],
+       ['DNP blocks ADP transport into the matrix','DNP is a proton shuttle, not a transport blocker.']]),
+     R('Lactate','Why is lactate high even though oxygen is present?',[
+       ['Complex IV inhibition stops electron transfer to oxygen, so the cell relies on glycolysis and LDH','Oxygen is present but unusable, so the cell behaves as if it were anaerobic.'],
+       ['Complex I is inhibited','Complex I inhibition would leave cytochrome c oxidized.'],
+       ['ATP synthase is structurally damaged','That would raise the gradient, not collapse it.'],
+       ['DNP blocks ATP synthesis','DNP was added in the experiment and is not the cause in the patient.'],
+       ['The malate-aspartate shuttle is nonfunctional','The shuttle depends on the chain, but it is not the cause of the block.']]),
+     R('Mitochondrial state','Which is most likely in his mitochondria?',[
+       ['Reduced proton concentration in the intermembrane space','The chain is not pumping protons, so the gradient collapses.'],
+       ['Increased membrane potential','Potential falls when pumping stops.'],
+       ['An elevated ATP/O ratio','Less ATP is made per oxygen, not more.'],
+       ['Accumulation of NAD+','NADH backs up, so NAD+ falls.'],
+       ['Increased ATP synthase turnover','There is no gradient to drive it.']]),
+     R('ATP synthase','What happens to the F0 domain of ATP synthase?',[
+       ['No rotation, because there is no proton gradient','F0 rotates only when protons flow down the gradient.'],
+       ['Increased rotation from excess protons','There are fewer protons, not more.'],
+       ['Reverse rotation hydrolyzing ATP','Reversal needs plenty of ATP, and ATP is low here.'],
+       ['Structural collapse of the c-ring','Nothing suggests structural damage.'],
+       ['Enhanced torque generation','Torque falls with the gradient.']])
+   ]},
+ { id:'ant', title:'Student with fatigue and low ATP',
+   vignette:'A 28-year-old graduate student has progressive fatigue, trouble concentrating, and muscle cramps with routine activity. Oxygen saturation is normal. Mitochondrial studies show an intact electron transport chain and a normal ATP synthase.',
+   labs:[
+     lab('Cytosolic ATP',-1,false,'Shows the cell is short of ATP, but not why.'),
+     lab('Oxygen consumption',-1,false,'Tells you the chain is slowed, not what slowed it.'),
+     lab('Membrane potential',1,false,'Fits several defects where protons are not flowing back.'),
+     lab('Chain and ATP synthase','normal',false,'Rules out the chain and the synthase, but does not locate the defect.'),
+     lab('Matrix ATP',1,true,'ATP is made, but it is stuck inside the matrix.'),
+     lab('Matrix ADP',-1,true,'ADP cannot get in, so the synthase runs out of substrate.')
+   ],
+   qs:[
+     R('Matrix ATP','Why does ATP accumulate in the matrix despite normal chain and ATP synthase?',[
+       ['The adenine nucleotide translocase cannot export ATP and import ADP','ANT swaps matrix ATP for cytosolic ADP, so a defect traps ATP inside.'],
+       ['Complex IV is inhibited','Then little ATP would be made at all.'],
+       ['The phosphate translocase is defective','Pi would run short and matrix ATP would not accumulate.'],
+       ['Oxidative phosphorylation is uncoupled','Uncoupling collapses the gradient and lowers ATP.'],
+       ['The malate-aspartate shuttle is overactive','The shuttle moves reducing equivalents, not adenine nucleotides.']]),
+     R('Slowed synthesis','Why does ATP synthesis slow even though ATP synthase is normal?',[
+       ['Matrix ADP runs out because ANT cannot import it, so the synthase has no substrate','ATP synthase needs ADP and Pi. Without ADP it idles.'],
+       ['ATP synthase is inhibited','The assays say it is normal.'],
+       ['The proton gradient is insufficient','The gradient is not the problem. It is high.'],
+       ['Complex IV is nonfunctional','The chain is intact.'],
+       ['DNP is present','No uncoupler is mentioned.']]),
+     R('Membrane potential','What happens to the membrane potential?',[
+       ['Hyperpolarization, because protons are not flowing back through ATP synthase','The chain keeps pumping while protons cannot return, so the gradient builds.'],
+       ['Depolarization due to DNP','No DNP is involved.'],
+       ['No change, because the chain is intact','The synthase is stalled, so the gradient changes.'],
+       ['Fluctuation from Complex IV inhibition','Complex IV is intact.'],
+       ['Collapse from ATP synthase reversal','Reversal is not the issue here.']]),
+     R('Oxygen use','What happens to oxygen consumption, and why?',[
+       ['It falls, because the gradient is high and without proton return the chain slows','This is respiratory control. When ATP synthase idles, the chain slows.'],
+       ['It rises, as with an uncoupler','An uncoupler drains the gradient. Here the gradient is high.'],
+       ['It stays the same','It falls with the high gradient.'],
+       ['It rises because ATP is low','The signal to speed up needs ADP at the synthase, which is missing.']])
+   ]},
+ { id:'bif', title:'Woman dizzy after a 24-hour fast',
+   vignette:'A 32-year-old woman feels fatigued and dizzy after a 24-hour fast.',
+   labs:[
+     lab('Blood glucose',-1,false,'Expected in a long fast.'),
+     lab('Insulin',-1,false,'Expected in a long fast.'),
+     lab('Glucagon',1,false,'Expected in a long fast. It starts the cAMP signal.'),
+     lab('FBPase-1 activity',1,false,'A downstream effect of low F2,6BP.'),
+     lab('Lactate','normal',false,'Shows no major block in gluconeogenesis.'),
+     lab('Red cell morphology','normal',false,'Rules out a red cell pyruvate kinase defect.'),
+     lab('Bifunctional enzyme phosphorylation',1,true,'Phosphorylation turns the enzyme toward FBPase-2.'),
+     lab('F2,6BP',-1,true,'Low F2,6BP means PFK-1 loses its activator.')
+   ],
+   qs:[
+     R('Pyruvate kinase','Why is liver pyruvate kinase activity low in this patient?',[
+       ['It is phosphorylated by cAMP-dependent protein kinase (PKA)','Glucagon raises cAMP and PKA, which phosphorylates and inactivates liver PK.'],
+       ['Allosteric inhibition by F1,6BP','F1,6BP activates pyruvate kinase.'],
+       ['Activation by insulin','Insulin is low during fasting.'],
+       ['Decreased AMP','AMP does not regulate liver PK this way.'],
+       ['Increased NADPH','NADPH does not regulate PK.']]),
+     R('Bifunctional enzyme','What does phosphorylation of the bifunctional enzyme do?',[
+       ['FBPase-2 is favored, F2,6BP falls, PFK-1 slows, and gluconeogenesis is favored','Phosphorylation switches the enzyme to FBPase-2, which degrades F2,6BP.'],
+       ['PFK-1 is activated and glycolysis rises','F2,6BP falls, so PFK-1 loses its activator.'],
+       ['F2,6BP synthesis increases','Phosphorylation shuts down PFK-2 activity.'],
+       ['Gluconeogenesis decreases','Low F2,6BP releases FBPase-1, so gluconeogenesis rises.'],
+       ['Hexokinase IV is activated','Not regulated by this enzyme.']]),
+     R('Glucokinase','Why is glucokinase (hexokinase IV) inactive during fasting?',[
+       ['A regulatory protein holds it in the nucleus when glucose is low','Glucokinase moves to the cytosol only when glucose rises.'],
+       ['G6P inhibits it','Glucokinase is not inhibited by G6P.'],
+       ['PKA phosphorylates it','PKA does not control glucokinase this way.'],
+       ['The proteasome degrades it','It is regulated by localization, not degradation.'],
+       ['F2,6BP activates it','F2,6BP acts on PFK-1 and FBPase-1, not glucokinase.']]),
+     R('Mutation','A mutation prevents phosphorylation of the bifunctional enzyme. What happens during fasting?',[
+       ['F2,6BP stays high, so glycolysis stays on and gluconeogenesis is blunted, worsening hypoglycemia','The enzyme cannot switch to FBPase-2.'],
+       ['F2,6BP falls as normal','It cannot fall without FBPase-2 activity.'],
+       ['Gluconeogenesis increases','F2,6BP stays high, which inhibits FBPase-1.'],
+       ['Pyruvate kinase becomes more active in the liver','PK would still be inactivated by PKA, but glycolysis is driven by PFK-1.'],
+       ['No change at all','Glycolysis and gluconeogenesis would both be affected.']])
+   ]},
+ { id:'ins', title:'Patient with diabetes admitted with low glucose',
+   vignette:'A 45-year-old man with type 1 diabetes is admitted after accidentally taking too much insulin.',
+   labs:[
+     lab('Blood glucose','42 mg/dL',false,'Shows hypoglycemia, but not the liver\'s mode.'),
+     lab('Insulin',1,true,'Sets the liver to the fed program.'),
+     lab('Glucagon',-1,true,'Without glucagon, the liver has no signal to make glucose.'),
+     lab('Lactate','normal',false,'Shows no major block in gluconeogenesis.'),
+     lab('Alanine',1,false,'A result of gluconeogenesis being off, not a cause.'),
+     lab('Liver F2,6BP',1,false,'A downstream effect of dephosphorylation.'),
+     lab('Liver PEPCK expression',-1,false,'A downstream effect of insulin.'),
+     lab('Liver pyruvate kinase',1,false,'A downstream effect of dephosphorylation.')
+   ],
+   qs:[
+     R('Liver state','Which is most likely in his liver?',[
+       ['Increased glycolysis','F2,6BP is high and PK is active, so the liver burns glucose even though blood glucose is low.'],
+       ['Increased gluconeogenesis','PEPCK expression is low and F2,6BP inhibits FBPase-1.'],
+       ['Increased glycogenolysis','Insulin inactivates glycogen phosphorylase.'],
+       ['Increased pentose phosphate flux','Nothing here drives it.'],
+       ['Increased ketogenesis','Insulin suppresses ketogenesis.']]),
+     R('Alanine','Why is serum alanine elevated?',[
+       ['The liver is not converting alanine to glucose, because gluconeogenesis is off','Without PEPCK and gluconeogenesis, alanine stays in the blood.'],
+       ['The liver is making more alanine from glucose','Not the main reason.'],
+       ['Muscle is breaking down more protein because of low glucose','Insulin is high and suppresses protein breakdown.'],
+       ['PDH is overactive','PDH activity would consume pyruvate, not raise alanine.']]),
+     R('Treatment','Which is the most appropriate treatment for his hypoglycemia?',[
+       ['Administer glucagon','Glucagon flips the liver to cAMP and PKA, restarting glycogen breakdown and gluconeogenesis.'],
+       ['Administer insulin','Insulin would lower glucose further.'],
+       ['Give a high-fat meal','Fatty acids cannot be converted to glucose, and the effect is too slow.'],
+       ['Inhibit pyruvate kinase','It slows glycolysis but does not switch on glucose output.'],
+       ['Stimulate PFK-1 activity','It would burn more glucose.']])
+   ]},
+ { id:'g6pd', title:'Young man with jaundice on a new medicine',
+   vignette:'A 28-year-old man develops fatigue and jaundice two days after starting an antimalarial medicine. A cousin has an inherited red cell enzyme deficiency.',
+   labs:[
+     lab('Hemoglobin',-1,false,'Shows hemolysis, but not the pathway.'),
+     lab('Reticulocytes',1,false,'The marrow responding to red cell loss.'),
+     lab('Bilirubin',1,false,'A hemoglobin breakdown product.'),
+     lab('Smear','bite cells and Heinz bodies',true,'Heinz bodies are denatured hemoglobin from oxidative damage.'),
+     lab('Red cell NADPH',-1,true,'NADPH is the reducing power that protects red cells.'),
+     lab('Reduced glutathione',-1,true,'GSH needs NADPH to be regenerated.'),
+     lab('Lactate','normal',false,'Shows glycolysis is fine.'),
+     lab('Glucose','normal',false,'Shows glucose supply is fine.')
+   ],
+   qs:[
+     R('Pathway','Which pathway is most directly impaired in his red cells?',[
+       ['Pentose phosphate pathway','It is the main source of NADPH in red cells.'],
+       ['Glycolysis','Lactate and glucose are normal, so glycolysis is working.'],
+       ['Gluconeogenesis','Red cells do not run it.'],
+       ['TCA cycle','Red cells have no mitochondria.'],
+       ['Fatty acid oxidation','Red cells have no mitochondria.']]),
+     R('Low NADPH','Which is the most direct consequence of low NADPH?',[
+       ['Impaired reduction of glutathione disulfide','Glutathione reductase needs NADPH, so GSH stays low.'],
+       ['Increased glycolytic ATP production','NADPH does not drive glycolysis.'],
+       ['Decreased ribose 5-phosphate synthesis','The non-oxidative branch can still make ribose 5-phosphate.'],
+       ['Increased transamination of pyruvate','Not connected to NADPH.'],
+       ['Enhanced pyruvate kinase activity','Not connected to NADPH.']]),
+     R('Normal glycolysis','His red cell ATP from glycolysis is normal despite the damage. Why?',[
+       ['Glycolysis does not require NADPH, so it is a separate pathway','Glycolysis runs on its own, and glucose and lactate are normal.'],
+       ['Glycolysis is upregulated by oxidative stress','Nothing says glycolysis changes.'],
+       ['Glucose uptake is increased in G6PD deficiency','Not a feature of this deficiency.'],
+       ['Pyruvate kinase is activated by NADPH','NADPH does not regulate PK.'],
+       ['Glycolysis bypasses glucose 6-phosphate','All glycolysis passes through G6P.']]),
+     R('The trigger','Why does hemolysis appear after the new medicine, rather than all the time?',[
+       ['The drug adds oxidative stress that red cells with little NADPH cannot neutralize','With low NADPH, GSH cannot keep up with peroxide from the drug.'],
+       ['The drug lowers glycolysis in red cells','The drug does not target glycolysis.'],
+       ['The drug raises NADPH too much','NADPH is low, not high.'],
+       ['The drug blocks the TCA cycle','Red cells have no TCA cycle.']])
+   ]}
+];
+
+function buildCase(c){
+  const items = [];
+  if(!c.noClue){
+    items.push({kind:'multi', style:'chips', clue:true, caseRef:c, tag:'Circle the clues',
+      q:'Tap the findings that point most directly to the broken step. These are the ones you would circle in the vignette.',
+      items:c.labs.map(l => ({t:l.n, v:l.v, key:l.key, why:l.why})), allowExtra:1});
+  }
+  c.qs.forEach(q => items.push({...q, caseRef:c}));
+  return items;
+}
+
+/* ================= DATA: fix the question ================= */
+const FLAWS = ['More than one answer is defensible','The correct answer stands out (longer, more detailed)','Not enough information to single out one answer','The answer key is factually wrong','The stem gives away the answer'];
+const CRIT = [
+ { flaw:0,
+   exam:'Which event occurs after insulin binds its receptor?\n\nA. The receptor dimerizes and autophosphorylates.\nB. IRS1 is phosphorylated on tyrosine.\nC. Grb2 binds IRS1 through its SH2 domain.\nD. Ras exchanges GDP for GTP.',
+   fixes:['Keep the stem and answer A, and rewrite B, C, and D into plausible but false statements (for example, "Raf-1 phosphorylates ERK directly")','Add a fifth option, "All of the above"','Change the stem to "Which of the following is NOT true?"'],
+   why1:'All four events really do happen after insulin binds, so any of them could be marked correct.',
+   why2:'Only the first rewrite leaves exactly one true statement. "All of the above" makes the item easier to game, and "NOT true" would now need three true statements and one false one, which this set does not have.' },
+ { flaw:1,
+   exam:'Glucagon binds its receptor on a hepatocyte. What happens next?\n\nA. A G protein stimulates adenylyl cyclase, cAMP rises, and PKA phosphorylates phosphorylase kinase and the bifunctional enzyme.\nB. Glycogen synthase is activated.\nC. PFK-2 is activated.\nD. PP1 is activated.',
+   fixes:['Shorten A to "cAMP rises and PKA is activated" and give B, C, and D similar length and detail','Move the long answer to position C so it is not first','Add a fifth option, "None of the above"'],
+   why1:'Test-wise students pick the longest, most specific option. The correct answer here is far longer than the rest, so it gets picked without any biochemistry.',
+   why2:'Match the length and detail of all options. Moving the answer or adding "None of the above" leaves the length clue in place.' },
+ { flaw:2,
+   exam:'A fasting child has low blood glucose. Which enzyme is MOST likely deficient?\n\nA. Glucose 6-phosphatase\nB. PEPCK\nC. FBPase-1\nD. Pyruvate carboxylase',
+   fixes:['Add findings that separate the choices (for example, enlarged liver, high lactate, high liver glycogen, and high liver G6P)','Change "most likely" to "definitely"','Add the word "hypoglycemic" to the stem'],
+   why1:'Every one of these enzymes lowers fasting glucose when it fails, so the stem gives no way to choose between them.',
+   why2:'Adding findings that point to one enzyme (here, the shared last step) lets students reason instead of guess. Rewording the stem adds no new information.' },
+ { flaw:3,
+   exam:'Which cofactor does pyruvate carboxylase, the first gluconeogenesis bypass enzyme, require?\n\nA. Biotin\nB. TPP\nC. Lipoic acid\nD. FAD\n\nAnswer key: B',
+   fixes:['Change the key to A, because pyruvate carboxylase uses biotin and TPP is the cofactor of PDH E1','Keep the key and add "in the PDH complex" to the stem','Delete option A so only one option is left that sounds right'],
+   why1:'The key is wrong. Pyruvate carboxylase is a biotin enzyme (with ATP and bicarbonate). TPP belongs to PDH E1.',
+   why2:'Fix the key. Rewriting the stem to "in the PDH complex" would make TPP, lipoic acid, and FAD all correct, and deleting biotin would leave a question with no correct answer.' },
+ { flaw:4,
+   exam:'A patient has low activity of the E3 subunit of the PDH complex. Which of the following best explains the high lactate?\n\nA. Impaired PDH complex function\nB. Increased gluconeogenesis\nC. Increased fatty acid oxidation\nD. Decreased glycolytic flux',
+   fixes:['List the findings (high lactate, pyruvate, and alanine, low ketones, urine lipoic acid derivatives) and drop the named subunit, with options of similar wording','Move the correct answer to position D','Add "All of the above" as option E'],
+   why1:'The stem names the PDH complex and option A repeats it, so students can match words without any reasoning.',
+   why2:'Describe the findings and let students infer the defect. Moving the answer or adding "All of the above" leaves the word match intact.' }
+];
+
+/* ================= state ================= */
+let mode = 'cascade';
+let exam = false;      // feedback at the end
+let run = null;
+
+/* ================= nav / settings ================= */
+$('#nav').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  mode = b.dataset.mode; run = null;
+  document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('on', x === b));
+  menu();
+});
+$('#seg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  exam = b.dataset.v === 'end';
+  document.querySelectorAll('#seg button').forEach(x => x.classList.toggle('on', x === b));
+});
+
+/* ================= menus ================= */
+function menu(){
+  let h = '<div class="sheet">';
+  if(mode === 'cascade'){
+    h += `<p class="lede">Pick a situation. At each step, choose what the body does next.</p><div class="list">`;
+    for(const k in SCEN) h += `<button data-act="scen" data-id="${k}"><b>${SCEN[k].name}</b><span>${SCEN[k].blurb}</span></button>`;
+    h += '</div>';
+  } else if(mode === 'trace'){
+    h += `<p class="lede">An enzyme gets blocked. Click each box to mark what piles up (↑) or runs short (↓), then pick the biggest pile-up. Some blocks add a question about how the cell copes.</p><div class="list">`;
+    h += `<button data-act="trace" data-id="mix"><b>Mixed round</b><span>Five random blocks from every pathway.</span></button>`;
+    PATHS.forEach(p => h += `<button data-act="trace" data-id="${p.id}"><b>${p.name}</b><span>${p.blurb}</span></button>`);
+    h += '</div>';
+  } else if(mode === 'detect'){
+    h += `<p class="lede">Read the case, circle the clues, then answer the way the exam asks. Every option explains why it is right or wrong.</p><div class="list">`;
+    h += `<button data-act="case" data-id="rand"><b>Random case</b><span>One case picked for you.</span></button>`;
+    CASES.forEach(c => { const n = buildCase(c).length; h += `<button data-act="case" data-id="${c.id}"><b>${c.title}</b><span>${n} steps</span></button>`; });
+    h += '</div>';
+  } else {
+    h += `<p class="lede">Each practice question has a flaw. First name the flaw, then choose the rewrite that fixes it.</p><div class="list">
+      <button data-act="crit"><b>Start a round</b><span>${CRIT.length} flawed questions, two steps each.</span></button></div>`;
+  }
+  h += '</div>';
+  app.innerHTML = h;
+}
+
+/* ================= run control ================= */
+function startRun(title, items, story){
+  run = {mode, title, items, i:0, results:[], exam, story};
+  render();
+}
+function cur(){ return run.items[run.i]; }
+
+function startScen(id){
+  const sc = SCEN[id];
+  startRun(sc.name, sc.steps.map(s => ({...s})), true);
+}
+function startTrace(id){
+  let pairs = [];
+  if(id === 'mix'){
+    PATHS.forEach(p => p.enz.forEach((_, e) => pairs.push({p, e})));
+    pairs = shuffle(pairs).slice(0,5);
+  } else {
+    const p = PATHS.find(x => x.id === id);
+    pairs = shuffle(p.enz.map((_, e) => ({p, e}))).slice(0,5);
+  }
+  const items = [];
+  pairs.forEach(x => {
+    items.push({kind:'grid', p:x.p, e:x.e, marks:[], pile:null});
+    const c = (x.p.comp || {})[x.p.enz[x.e]];
+    if(c) items.push({...c});
+  });
+  startRun(id === 'mix' ? 'Block it, mixed' : 'Block it, ' + pairs[0].p.name, items, false);
+}
+function startCase(id){
+  const c = id === 'rand' ? CASES[Math.floor(Math.random() * CASES.length)] : CASES.find(x => x.id === id);
+  startRun(c.title, buildCase(c), false);
+  run.caseId = c.id;
+}
+function startCrit(){
+  const items = [];
+  CRIT.forEach(c => {
+    items.push({kind:'mc', tag:'Name the flaw', q:'What is wrong with this question?', ctx:c.exam, opts:[FLAWS[c.flaw], ...FLAWS.filter((_, i) => i !== c.flaw)], why:c.why1});
+    items.push({kind:'mc', tag:'Choose the fix', q:'Which rewrite fixes it best?', ctx:c.exam, opts:[...c.fixes], why:c.why2});
+  });
+  startRun('Fix the question', items, false);
+}
+
+/* ================= rendering ================= */
+function ticks(){
+  let h = '<div class="ticks">';
+  run.items.forEach((it, i) => {
+    let c = 'tick';
+    const r = run.results[i];
+    if(i === run.i && !r) c += ' cur';
+    else if(r) c += run.exam ? ' done' : (r.ok ? ' ok' : ' bad');
+    h += `<div class="${c}"></div>`;
+  });
+  return h + '</div>';
+}
+function tblock(){
+  const right = run.results.filter(r => r.ok).length;
+  const marks = run.exam ? 'hidden until the end' : `${right} of ${run.results.length} right`;
+  return `<div class="tblock"><div><span>Drill</span><b>${run.title}</b></div><div><span>Item</span><b>${run.i + 1} of ${run.items.length}</b></div><div><span>Feedback</span><b>${run.exam ? 'At the end' : 'After each'}</b></div><div><span>Score so far</span><b>${marks}</b></div></div>`;
+}
+function ribbon(upto, full){
+  const parts = [];
+  for(let i = 0; i < upto; i++){
+    const it = run.items[i];
+    const txt = run.exam && !full ? 'locked in' : it.chain;
+    parts.push(`<span class="s"><i>${it.label}</i>${txt}</span>`);
+  }
+  return parts.length ? `<div class="ribbon">${parts.join('<span class="ar">›</span>')}</div>` : '';
+}
+function chipHTML(l){
+  const d = l.v;
+  const val = typeof d === 'number' ? arrow(d) : d;
+  const cls = typeof d === 'number' ? (d < 0 ? 'dn' : '') : 'eq';
+  return `<span class="chip ${cls}">${l.n}<b>${val}</b></span>`;
+}
+function caseBox(it){
+  const c = it.caseRef; if(!c) return '';
+  const open = run.items.indexOf(it) === 0 || it.clue;
+  let h = `<details class="case" ${open ? 'open' : ''}><summary>The case</summary><div class="inner"><div class="exam">${c.vignette}</div>`;
+  if(!it.clue && c.labs.length) h += '<div class="chips">' + c.labs.map(chipHTML).join('') + '</div>';
+  return h + '</div></details>';
+}
+
+function render(){
+  const it = cur();
+  if(it.kind === 'mc') renderMC(it);
+  else if(it.kind === 'multi') renderMulti(it);
+  else renderGrid(it);
+}
+
+function renderMC(it){
+  if(!it.order) it.order = shuffle(it.opts.map((_, i) => i));
+  let h = `<div class="sheet">${ticks()}`;
+  if(run.story) h += ribbon(run.i);
+  h += caseBox(it);
+  h += `<p class="tag">${it.tag || ''}</p>`;
+  if(it.ctx) h += `<div class="exam">${it.ctx}</div>`;
+  h += `<h3 class="q">${it.q}</h3>`;
+  h += '<div class="opts">';
+  it.order.forEach((oi, k) => {
+    h += `<button class="opt" data-oi="${oi}"><span class="bub">${L(k)}</span><span class="t"><span class="tx">${it.opts[oi]}</span><span class="rs"></span></span></button>`;
+  });
+  h += `</div><div id="fb"></div><div class="actions" id="act"></div>${tblock()}</div>`;
+  app.innerHTML = h;
+}
+
+function nextBtn(){
+  const last = run.i >= run.items.length - 1;
+  $('#act').innerHTML = `<button class="btn" data-act="next">${last ? 'Show results' : 'Next question'}</button>`;
+  $('#act button').focus();
+}
+
+function rsDetail(it, ok, pickText){
+  return `<p><b>Answer:</b> ${it.opts[0]}</p>` +
+    it.order.map((oi, k) => `<p><b>${L(k)}${oi === 0 ? ' (correct)' : ''}.</b> ${it.opts[oi]}<br><small>${it.rs[oi]}</small></p>`).join('') +
+    (ok ? '' : `<p><small>You picked: ${pickText}</small></p>`);
+}
+
+function pickMC(pick){
+  const it = cur(); if(it.done) return;
+  it.done = true;
+  const ok = pick === 0;
+  const q = it.ctx ? it.tag + ': ' + it.q : it.q;
+  const detail = it.rs ? rsDetail(it, ok, it.opts[pick])
+    : `<p><b>Answer:</b> ${it.opts[0]}</p><p>${it.why}</p>` + (ok ? '' : `<p><small>You picked: ${it.opts[pick]}</small></p>`);
+  run.results.push({ok, tag:it.tag, title:q.length > 96 ? q.slice(0, 94) + '…' : q, detail});
+  document.querySelectorAll('.opt').forEach(b => {
+    const k = +b.dataset.oi; b.disabled = true;
+    const bub = b.querySelector('.bub');
+    if(run.exam){ if(k === pick) b.classList.add('sel'); }
+    else {
+      if(k === 0){ b.classList.add('ok'); bub.textContent = '✓'; }
+      else if(k === pick){ b.classList.add('bad'); bub.textContent = '✕'; }
+      if(it.rs) b.querySelector('.rs').textContent = it.rs[k];
+    }
+  });
+  if(!run.exam){
+    if(it.rs){
+      $('#fb').innerHTML = ok
+        ? `<div class="note"><h4>That logic holds.</h4><p>Read why each option is right or wrong above.</p></div>`
+        : `<div class="note bad"><h4>Not quite.</h4><p>The answer is highlighted. Read the note under each option to see why.</p></div>`;
+    } else {
+      $('#fb').innerHTML = ok
+        ? `<div class="note"><h4>That logic holds.</h4><p>${it.why}</p></div>`
+        : `<div class="note bad"><h4>Not quite.</h4><p><b>Answer:</b> ${it.opts[0]}</p><p>${it.why}</p></div>`;
+    }
+  }
+  nextBtn();
+}
+
+/* ---- multi (clues and select all that apply) ---- */
+function renderMulti(it){
+  if(!it.sel) it.sel = new Set();
+  if(!it.order) it.order = it.style === 'rows' ? shuffle(it.items.map((_, i) => i)) : it.items.map((_, i) => i);
+  let h = `<div class="sheet">${ticks()}${caseBox(it)}<p class="tag">${it.tag || ''}</p><h3 class="q">${it.q}</h3>`;
+  if(it.style === 'chips'){
+    h += '<div class="chips">' + it.order.map(i => {
+      const x = it.items[i], d = x.v;
+      const val = typeof d === 'number' ? arrow(d) : d;
+      const cls = typeof d === 'number' ? (d < 0 ? 'dn' : '') : 'eq';
+      return `<button class="chip pick ${cls}" data-m="${i}">${x.t}<b>${val}</b></button>`;
+    }).join('') + '</div>';
+  } else {
+    h += '<div class="opts">' + it.order.map((i, k) =>
+      `<button class="opt pick" data-m="${i}"><span class="bub">${L(k)}</span><span class="t"><span class="tx">${it.items[i].t}</span><span class="rs"></span></span></button>`).join('') + '</div>';
+  }
+  h += `<div class="actions"><button class="btn" data-act="checkm" id="chk">${it.clue ? 'Check my clues' : 'Check my answers'}</button><span class="warn" id="warn"></span></div><div id="fb"></div><div class="actions" id="act"></div>${tblock()}</div>`;
+  app.innerHTML = h;
+}
+function toggleMulti(i){
+  const it = cur(); if(it.kind !== 'multi' || it.done) return;
+  if(it.sel.has(i)) it.sel.delete(i); else it.sel.add(i);
+  document.querySelectorAll('.pick').forEach(b => {
+    const on = it.sel.has(+b.dataset.m);
+    b.classList.toggle('on', on);
+    if(b.classList.contains('opt')) b.classList.toggle('sel', on);
+  });
+}
+function checkMulti(){
+  const it = cur(); if(it.done) return;
+  if(it.sel.size === 0){ $('#warn').textContent = 'Pick at least one first.'; return; }
+  it.done = true;
+  const keys = it.items.map((x, i) => x.key ? i : -1).filter(i => i >= 0);
+  const missed = keys.filter(i => !it.sel.has(i));
+  const extras = [...it.sel].filter(i => !it.items[i].key);
+  const ok = missed.length === 0 && extras.length <= (it.allowExtra || 0);
+  const lines = it.order.map(i => {
+    const x = it.items[i];
+    const tag = x.key ? (it.sel.has(i) ? 'Key clue, you got it' : 'Key clue, you missed it') : (it.sel.has(i) ? 'Not a key clue, you picked it' : 'Not a key clue');
+    return `<p><b>${x.t}</b> (${tag})<br><small>${x.why}</small></p>`;
+  }).join('');
+  const q = it.clue ? 'Circle the clues' : it.q;
+  run.results.push({ok, tag:it.tag, title:q.length > 96 ? q.slice(0, 94) + '…' : q, detail:lines});
+  $('#chk').style.display = 'none'; $('#warn').textContent = '';
+  document.querySelectorAll('.pick').forEach(b => {
+    const i = +b.dataset.m, x = it.items[i], chosen = it.sel.has(i);
+    b.disabled = true; b.classList.remove('on', 'sel');
+    if(run.exam){ if(chosen) b.classList.add(b.classList.contains('opt') ? 'sel' : 'on'); return; }
+    const bub = b.querySelector('.bub');
+    if(x.key && chosen){ b.classList.add('ok'); if(bub) bub.textContent = '✓'; }
+    else if(x.key){ b.classList.add('miss'); if(bub) bub.textContent = '!'; }
+    else if(chosen){ b.classList.add('bad'); if(bub) bub.textContent = '✕'; }
+    const rs = b.querySelector('.rs'); if(rs) rs.textContent = x.why;
+  });
+  if(!run.exam){
+    const head = ok ? 'That logic holds.' : (missed.length ? 'You missed a key finding.' : 'Close. You circled too much.');
+    const body = it.clue ? '<p>Key clues are outlined in green. A dashed yellow outline is one you missed. Red is not a key clue.</p>' : '<p>Read the note under each option.</p>';
+    $('#fb').innerHTML = `<div class="note ${ok ? '' : 'bad'}"><h4>${head}</h4>${body}${it.clue ? lines : ''}</div>`;
+  }
+  nextBtn();
+}
+
+/* ---- grid ---- */
+function expectedFor(p, e){
+  const rows = p.mets.map((m, i) => ({name:m, dir:i <= e ? 1 : -1, kind:'met'}));
+  const ex = (p.extraAll || []).concat((p.extras && p.extras[p.enz[e]]) || []);
+  ex.forEach(([n, d]) => rows.push({name:n, dir:d, kind:'extra'}));
+  return rows;
+}
+function renderGrid(it){
+  const {p, e} = it;
+  it.rows = expectedFor(p, e);
+  const n = p.mets.length;
+  let h = `<div class="sheet">${ticks()}<p class="tag">${p.name}</p>`;
+  h += `<h3 class="q">${p.enz[e]} is blocked. Click each box to mark it: ↑ piles up, ↓ runs short.</h3><div class="chain">`;
+  p.mets.forEach((m, i) => {
+    h += `<div class="node" data-r="${i}"><span>${m}</span><span class="mk">?</span></div>`;
+    if(i < p.enz.length){
+      const b = i === e;
+      h += `<div class="link ${b ? 'blocked' : ''}"><span>${p.enz[i]}</span><i></i>${b ? '<em class="stamp">✕ blocked</em>' : ''}</div>`;
+    }
+  });
+  h += '</div>';
+  const ex = it.rows.slice(n);
+  if(ex.length){
+    h += '<p class="sub2">Also track these side effects</p><div class="extras">';
+    ex.forEach((r, j) => h += `<div class="node" data-r="${n + j}"><span>${r.name}</span><span class="mk">?</span></div>`);
+    h += '</div>';
+  }
+  if(e >= 1){
+    h += '<p class="sub2">Which one piles up the most?</p><div class="extras">';
+    for(let i = 0; i <= e; i++) h += `<button class="pile" data-pile="${i}">${p.mets[i]}</button>`;
+    h += '</div>';
+  }
+  h += `<div class="actions"><button class="btn" data-act="check" id="chk">Check my marks</button><span class="warn" id="warn"></span></div><div id="fb"></div><div class="actions" id="act"></div>${tblock()}</div>`;
+  app.innerHTML = h;
+}
+function paintGrid(it, reveal){
+  document.querySelectorAll('.node').forEach(nd => {
+    const r = +nd.dataset.r, m = it.marks[r], row = it.rows[r];
+    nd.classList.toggle('up', m === 1);
+    nd.classList.toggle('dn', m === -1);
+    const good = m === row.dir;
+    const mk = nd.querySelector('.mk');
+    if(reveal){
+      nd.classList.add('locked', good ? 'ok' : 'bad');
+      mk.innerHTML = arrow(m) + (good ? '' : `<small>key ${arrow(row.dir)}</small>`);
+    } else {
+      mk.textContent = m === undefined ? '?' : arrow(m);
+      if(it.done) nd.classList.add('locked');
+    }
+  });
+  document.querySelectorAll('.pile').forEach(b => {
+    const i = +b.dataset.pile;
+    b.classList.toggle('on', it.pile === i && !reveal);
+    if(reveal){
+      b.disabled = true;
+      if(i === it.e) b.classList.add('ok'); else if(i === it.pile) b.classList.add('bad');
+    }
+  });
+}
+function cycleNode(r){
+  const it = cur(); if(it.kind !== 'grid' || it.done) return;
+  const m = it.marks[r];
+  it.marks[r] = m === undefined ? 1 : m === 1 ? -1 : undefined;
+  paintGrid(it, false);
+}
+function checkGrid(){
+  const it = cur(); if(it.done) return;
+  const missing = it.rows.some((_, i) => it.marks[i] === undefined) || (it.e >= 1 && it.pile == null);
+  if(missing){ $('#warn').textContent = 'Mark every box' + (it.e >= 1 ? ' and pick the biggest pile-up' : '') + ' first.'; return; }
+  it.done = true;
+  const p = it.p, e = it.e;
+  let wrong = 0; const lines = [];
+  it.rows.forEach((r, i) => {
+    const good = it.marks[i] === r.dir; if(!good) wrong++;
+    lines.push(`${r.name}: you ${arrow(it.marks[i])}, key ${arrow(r.dir)}${good ? '' : ' (missed)'}`);
+  });
+  const pileOk = it.e < 1 || it.pile === e;
+  const ok = wrong === 0 && pileOk;
+  const sub = p.mets[e], prod = p.mets[e + 1];
+  let why = `<p><b>${p.enz[e]}</b> is blocked. Everything up to <b>${sub}</b> backs up (↑). Everything after the block, starting with <b>${prod}</b>, runs short (↓). The biggest pile-up sits right at the block: <b>${sub}</b>.</p>`;
+  const exs = it.rows.filter(r => r.kind === 'extra');
+  if(exs.length) why += `<p>Side effects: ${exs.map(r => r.name + ' ' + arrow(r.dir)).join(', ')}.</p>`;
+  const note = (p.notes || {})[p.enz[e]]; if(note) why += `<p>${note}</p>`;
+  if(p.foot) why += `<p><small>${p.foot}</small></p>`;
+  const detail = why + `<p><small>${lines.join('<br>')}${it.e >= 1 ? '<br>Biggest pile-up: you picked ' + p.mets[it.pile] + (pileOk ? '' : ' (missed)') : ''}</small></p>`;
+  run.results.push({ok, tag:p.name, title:`${p.enz[e]} blocked in ${p.name}`, detail});
+  $('#chk').style.display = 'none'; $('#warn').textContent = '';
+  paintGrid(it, !run.exam);
+  if(run.exam) document.querySelectorAll('.node').forEach(n => n.classList.add('locked'));
+  if(!run.exam){
+    $('#fb').innerHTML = ok
+      ? `<div class="note"><h4>Every mark holds.</h4>${why}</div>`
+      : `<div class="note bad"><h4>${wrong} box${wrong === 1 ? '' : 'es'} off${pileOk ? '' : ', and the biggest pile-up is elsewhere'}.</h4>${why}</div>`;
+  }
+  nextBtn();
+}
+
+/* ---- finish ---- */
+function finish(){
+  const total = run.results.length, right = run.results.filter(r => r.ok).length;
+  const missed = {};
+  run.results.forEach(r => { if(!r.ok) missed[r.tag] = (missed[r.tag] || 0) + 1; });
+  let h = `<div class="sheet"><p class="tag">${run.title}</p><div class="score">${right}<small> of ${total}</small></div>`;
+  h += `<p class="lede">${right === total ? 'Clean sheet. Try a different drill, or switch feedback to "At the end" to test yourself like an exam.' : right / total >= .7 ? 'Solid. Open the missed items below and trace where the logic slipped.' : 'Good first pass. Read each miss below, then run another round.'}</p>`;
+  const keys = Object.keys(missed);
+  if(keys.length) h += `<div class="weak"><b>Where the misses landed</b><p style="margin:6px 0 0">${keys.map(k => `${k} (${missed[k]})`).join(', ')}</p></div>`;
+  if(run.story) h += `<p class="sub2">The full chain</p>${ribbon(run.items.length, true)}`;
+  run.results.forEach(r => {
+    h += `<details class="r" ${(!r.ok || run.exam) ? 'open' : ''}><summary><span class="m ${r.ok ? 'ok' : 'bad'}">${r.ok ? '✓' : '✕'}</span><span>${r.title}</span></summary><div class="body">${r.detail}</div></details>`;
+  });
+  h += `<div class="actions"><button class="btn" data-act="again">Run another round</button><button class="btn ghost" data-act="menu">Back to menu</button></div></div>`;
+  app.innerHTML = h;
+  window.scrollTo({top:0});
+}
+
+/* ================= events ================= */
+app.addEventListener('click', e => {
+  const t = e.target;
+  const a = t.closest('[data-act]');
+  if(a){
+    const act = a.dataset.act;
+    if(act === 'scen') startScen(a.dataset.id);
+    else if(act === 'trace') startTrace(a.dataset.id);
+    else if(act === 'case') startCase(a.dataset.id);
+    else if(act === 'crit') startCrit();
+    else if(act === 'check') checkGrid();
+    else if(act === 'checkm') checkMulti();
+    else if(act === 'menu'){ run = null; menu(); }
+    else if(act === 'again'){
+      if(mode === 'cascade'){ const id = Object.keys(SCEN).find(k => SCEN[k].name === run.title); startScen(id); }
+      else if(mode === 'trace'){ const p = PATHS.find(x => run.title.endsWith(x.name)); startTrace(p ? p.id : 'mix'); }
+      else if(mode === 'detect') startCase('rand');
+      else startCrit();
+    }
+    else if(act === 'next'){ run.i++; if(run.i >= run.items.length) finish(); else { render(); window.scrollTo({top:0}); } }
+    return;
+  }
+  const pk = t.closest('[data-m]');
+  if(pk && !pk.disabled){ toggleMulti(+pk.dataset.m); return; }
+  const o = t.closest('.opt');
+  if(o && !o.disabled && o.dataset.oi !== undefined){ pickMC(+o.dataset.oi); return; }
+  const nd = t.closest('.node');
+  if(nd){ cycleNode(+nd.dataset.r); return; }
+  const pl = t.closest('.pile');
+  if(pl && !pl.disabled){ const it = cur(); if(it.done) return; it.pile = +pl.dataset.pile; paintGrid(it, false); }
+});
+
+menu();
+</script>
+</body>
+</html>
