@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BCH 4024 Exam 2 Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --text: #1f2937;
+  --text-dim: #6b7280;
+  --accent: #3b82f6;
+  --accent-light: #eff6ff;
+  --correct: #10b981;
+  --incorrect: #ef4444;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-dim: #cbd5e1;
+    --accent: #60a5fa;
+    --accent-light: #0c4a6e;
+    --correct: #10b981;
+    --incorrect: #ef4444;
+  }
+}
+
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+header p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.nav-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.nav-card.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.nav-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.nav-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.content {
+  display: none;
+}
+
+.content.active {
+  display: block;
+}
+
+.question-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.q-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: var(--text);
+}
+
+.q-context {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  border-radius: 4px;
+}
+
+.q-labs {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 6px;
+  font-family: 'Inter', monospace;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.q-labs strong {
+  color: var(--accent);
+}
+
+.chain-visual {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.chain-node {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.chain-node.up { border-color: var(--accent); color: var(--accent); }
+.chain-node.dn { border-color: var(--incorrect); color: var(--incorrect); }
+
+.chain-arrow { color: var(--text-dim); font-weight: 600; }
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.option {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.option-letter {
+  flex: 0 0 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.option.selected .option-letter {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.option.correct {
+  border-color: var(--correct);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.option.correct .option-letter {
+  background: var(--correct);
+  color: white;
+  border-color: var(--correct);
+}
+
+.option.incorrect {
+  border-color: var(--incorrect);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.option.incorrect .option-letter {
+  background: var(--incorrect);
+  color: white;
+  border-color: var(--incorrect);
+}
+
+.option-text { flex: 1; }
+.option-text .txt { font-weight: 500; }
+.option.incorrect .txt { text-decoration: line-through; color: var(--text-dim); }
+
+.option-reason {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.option.correct .option-reason { color: var(--correct); }
+.option.incorrect .option-reason { color: var(--incorrect); }
+
+.feedback-toggle {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+
+.feedback-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.feedback-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.progress {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn:hover { filter: brightness(1.1); }
+
+.btn.ghost {
+  background: var(--bg);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.intro-text {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.intro-text h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>BCH 4024 Exam 2 Practice</h1>
+    <p>Pathway logic and clinical reasoning</p>
+  </header>
+
+  <div class="nav-grid">
+    <div class="nav-card active" data-mode="cascade">
+      <h3>Cascade</h3>
+      <p>Step-by-step hormone and enzyme logic</p>
+    </div>
+    <div class="nav-card" data-mode="detect">
+      <h3>Find the Fault</h3>
+      <p>Diagnose from lab findings</p>
+    </div>
+  </div>
+
+  <div id="app"></div>
+
+  <footer>
+    Practice material written for SI sessions. It is not from your professors, so check it against your own lecture slides.
+  </footer>
+</div>
+
+<script>
+/* ================= DATA ================= */
+
+const SCEN = {
+  epi: {
+    name: 'Epinephrine stress',
+    blurb: 'Sudden threat triggers an acute fight-or-flight response. Trace epinephrine through muscle and liver.',
+    steps: [
+      {
+        q: 'Epinephrine is released from the adrenal medulla. What receptor does it bind in skeletal muscle?',
+        a: 'Beta-adrenergic receptor, a Gs-coupled GPCR',
+        w: ['Alpha-1 adrenergic receptor, a Gq GPCR', 'Insulin receptor, a receptor tyrosine kinase', 'Muscarinic acetylcholine receptor, a Gi GPCR'],
+        why: 'Epinephrine activates beta-adrenergic receptors on muscle and heart via Gs (raises cAMP). Alpha-adrenergic receptors are on blood vessels and trigger vasoconstriction.'
+      },
+      {
+        q: 'Epinephrine binds and the beta-receptor activates Gs. What happens to adenylyl cyclase?',
+        a: 'It is stimulated to convert ATP to cAMP and pyrophosphate',
+        w: ['It is inhibited by the Gs alpha subunit', 'It converts cAMP to AMP (opposite reaction)', 'It phosphorylates the Gs protein directly'],
+        why: 'Gs-coupled receptors stimulate adenylyl cyclase, raising cAMP. This cAMP activates PKA.'
+      },
+      {
+        q: 'PKA is now active in the muscle cell. What does it do to glycogen phosphorylase?',
+        a: 'It phosphorylates phosphorylase kinase, which phosphorylates phosphorylase (activating it)',
+        w: ['It directly phosphorylates glycogen synthase, turning it off', 'It dephosphorylates phosphorylase, turning it off', 'It activates PP1, which dephosphorylates phosphorylase'],
+        why: 'PKA phosphorylates phosphorylase kinase, which then phosphorylates glycogen phosphorylase. Phosphorylated phosphorylase (phosphorylase a) is the active form, so glycogenolysis proceeds.'
+      },
+      {
+        q: 'At the same time, PKA phosphorylates glycogen synthase. What is the consequence?',
+        a: 'Glycogen synthase is inactivated, stopping new glycogen synthesis',
+        w: ['Glycogen synthase is activated and makes more glycogen', 'Glycogen synthase is unaffected because PKA targets only phosphorylase', 'Glycogen synthase cleaves existing glycogen bonds'],
+        why: 'PKA phosphorylates both phosphorylase kinase (activating breakdown) and glycogen synthase (inactivating synthesis). This prevents glycogen from being built and broken down at the same time.'
+      },
+      {
+        q: 'In the liver, epinephrine also activates the same beta-receptor. What is the critical difference in how the liver responds compared to muscle?',
+        a: 'The liver has glucose-6-phosphatase, so it can export free glucose into the blood to fuel muscles',
+        w: ['Muscle has glucose-6-phosphatase, not the liver', 'The liver does not express glycogen phosphorylase', 'The liver only synthesizes glycogen, never breaks it down'],
+        why: 'Both muscle and liver break down glycogen to G6P when epinephrine hits. But only the liver has G6Pase to strip the phosphate and release free glucose into the blood. Muscle keeps G6P for its own glycolysis.'
+      },
+      {
+        q: 'Overall, how does epinephrine prepare the body for acute stress?',
+        a: 'Muscles get rapid glucose from liver glycogenolysis; their own glycogen breaks down for ATP; glucose is oxidized fast in glycolysis',
+        w: ['Muscles switch to fat oxidation and ignore glucose', 'The liver makes new glucose from amino acids only', 'Blood glucose stays low to conserve glucose for the brain'],
+        why: 'Stress requires fast ATP. Glycogenolysis floods glucose, glycolysis burns it quickly, and muscle gets fuel from two sources: its own stores and liver export. This is a "burst" state, not sustainable.'
+      }
+    ]
+  },
+  mitochondrial: {
+    name: 'Energy crisis in mitochondria',
+    blurb: 'A cell is starving for ATP. Trace what happens when the electron transport chain is impaired.',
+    steps: [
+      {
+        q: 'The TCA cycle is running, producing NADH and FADH2. But Complex I is dysfunctional and cannot oxidize NADH. What happens to NADH?',
+        a: 'NADH accumulates in the matrix because it cannot be reoxidized to NAD+',
+        w: ['NADH is quickly converted to ATP to compensate', 'NADH is exported to the cytosol for use elsewhere', 'The TCA cycle speeds up to bypass Complex I'],
+        why: 'Complex I is the entry point for NADH electrons. Without it, NADH piles up and NAD+ becomes scarce. The TCA cycle stalls because isocitrate dehydrogenase needs NAD+.'
+      },
+      {
+        q: 'As NAD+ becomes scarce, what happens to glycolysis in the cytosol?',
+        a: 'Glyceraldehyde-3-phosphate dehydrogenase cannot oxidize G3P to 1,3-BPG because NAD+ is needed for this step',
+        w: ['Glycolysis speeds up to compensate for the mitochondrial problem', 'Glycolysis is unaffected because it generates ATP directly', 'Pyruvate is stored as glycogen instead of entering mitochondria'],
+        why: 'Glycolysis requires NAD+ at the G3P dehydrogenase step. If mitochondrial NAD+ cannot be regenerated, cytosolic NAD+ gets depleted too, and glycolysis stalls.'
+      },
+      {
+        q: 'To keep some ATP production going, the cell shunts pyruvate to lactate via lactate dehydrogenase. Why does this work?',
+        a: 'Lactate dehydrogenase converts pyruvate back to lactate, regenerating NAD+ so glycolysis can keep running',
+        w: ['Lactate directly generates ATP via a specialized pathway', 'Lactate is exported and triggers more glucose uptake', 'Lactate replaces NAD+ as an electron carrier'],
+        why: 'LDH reduces pyruvate to lactate, oxidizing NADH back to NAD+. This regenerates the NAD+ that glycolysis needs, even though no ATP is gained from the lactate itself. It is a NAD+ rescue, not an energy source.'
+      },
+      {
+        q: 'What would a blood test show in this patient?',
+        a: 'High lactate and low ATP, because glycolysis runs but cannot fully oxidize pyruvate',
+        w: ['High pyruvate and normal lactate, because lactate dehydrogenase is inactive', 'Low lactate and normal ATP, because the cell compensates perfectly', 'High glucose and normal ATP, because glycolysis is accelerated'],
+        why: 'Glycolysis still produces pyruvate, but pyruvate piles up and is shunted to lactate, causing lactic acidosis. ATP remains low because glycolysis yields only 2 ATP per glucose, and the Krebs-ETC pathway is broken.'
+      },
+      {
+        q: 'If the Complex I defect is severe enough, how would the proton gradient across the inner mitochondrial membrane be affected?',
+        a: 'The gradient would collapse because protons are not pumped by Complexes I, III, and IV without electron flow',
+        w: ['The gradient would strengthen as ATP synthase works harder to compensate', 'The gradient is unaffected because Complex II still works', 'The gradient persists but is reversed in direction'],
+        why: 'Electron transport drives proton pumping at Complexes I, III, and IV. Without electron flow from NADH, most of the pump power is lost. The few protons pumped by Complex II are not enough to sustain the membrane potential.'
+      }
+    ]
+  }
+};
+
+const CASES = [
+  {
+    name: 'GLUT1 transporter defect',
+    blurb: 'A 6-year-old boy experiences frequent seizures and developmental delay. Brain glucose uptake is impaired despite normal blood glucose.',
+    labs: [
+      'Blood glucose: 92 mg/dL (normal)',
+      'Cerebrospinal fluid (CSF) glucose: 18 mg/dL (very low; normal 40-70)',
+      'Seizures triggered by fasting',
+      'Brain imaging: normal structure',
+      'Lactate: normal in serum',
+      'Improvement with high-frequency carbohydrate feeding'
+    ],
+    q: 'Which protein defect best explains the low CSF glucose despite normal blood glucose?',
+    opts: [
+      'GLUT1 glucose transporter on the blood-brain barrier (cannot transport glucose across barrier)',
+      'Hexokinase (glucose entry into neurons is blocked)',
+      'Glucose-6-phosphatase (glucose release from liver is blocked)',
+      'Glucokinase (pancreatic beta cells cannot sense glucose)',
+      'GLUT4 (muscle glucose uptake is blocked)'
+    ],
+    why: 'GLUT1 is the primary transporter on the blood-brain barrier. A defect leaves glucose in the blood but starves the brain, causing seizures during fasting when brain demands are high. High-dose carbohydrates increase serum glucose, allowing some glucose through remaining GLUT1 molecules via mass action. CSF glucose is the key finding: it is low only in GLUT1 deficiency, not in other glycolytic or mitochondrial disorders.'
+  },
+  {
+    name: 'PFK-2/FBPase-2 regulation defect',
+    blurb: 'A 14-year-old runner collapses during a sprint. She has normal fasting glucose but becomes hypoglycemic during intense exercise.',
+    labs: [
+      'Fasting blood glucose: 95 mg/dL (normal)',
+      'After sprint: glucose 55 mg/dL (hypoglycemic)',
+      'Fructose-2,6-bisphosphate (F2,6BP) in liver: inappropriately elevated during exercise',
+      'Lactate during exercise: low (should be high)',
+      'Alanine (gluconeogenic substrate): elevated but not mobilized',
+      'Glycogen stores: normal'
+    ],
+    q: 'What is most likely wrong with hepatic glucose output during exercise?',
+    opts: [
+      'PFK-2/FBPase-2 is stuck in the PFK-2 mode (F2,6BP too high), so FBPase-1 is inhibited and gluconeogenesis is blocked during exercise',
+      'Hexokinase is overactive and traps all glucose as G6P in the liver',
+      'Glycogen phosphorylase is inactive and cannot break down stored glycogen',
+      'Pyruvate carboxylase is deficient and cannot start gluconeogenesis',
+      'Glucose-6-phosphatase is overactive and drains all glucose from the liver'
+    ],
+    why: 'During intense exercise, epinephrine should phosphorylate the bifunctional enzyme, switching it to FBPase-2 mode (low F2,6BP, PFK-1 inhibited, gluconeogenesis ON). If the enzyme stays in PFK-2 mode (high F2,6BP), PFK-1 is active and FBPase-1 is inhibited, so gluconeogenesis cannot proceed. The liver cannot export glucose despite having alanine as a substrate. This is a regulation defect, not an enzyme deficiency.'
+  },
+  {
+    name: 'PDH complex deficiency',
+    blurb: 'An 8-month-old boy has severe developmental delay, hypotonia, and lactic acidosis that worsens with carbohydrate meals.',
+    labs: [
+      'Blood lactate: 7.1 mmol/L (very high)',
+      'Pyruvate: 1.2 mmol/L (elevated)',
+      'Lactate/pyruvate ratio: 5.9 (moderately elevated)',
+      'Alanine: very high',
+      'Blood glucose: normal',
+      'Improvement with high-fat, low-carbohydrate diet'
+    ],
+    q: 'Which metabolic block explains why carbohydrate worsens lactic acidosis?',
+    opts: [
+      'Pyruvate dehydrogenase complex deficiency; pyruvate cannot enter TCA, accumulates, and is shunted to lactate',
+      'Fructose-1,6-bisphosphatase deficiency (gluconeogenesis block)',
+      'Complex I deficiency in the electron transport chain',
+      'Pyruvate carboxylase deficiency (gluconeogenesis starts but cannot continue)',
+      'Lactate dehydrogenase overexpression (makes too much lactate)'
+    ],
+    why: 'PDH deficiency means pyruvate made from carbohydrate cannot enter the TCA cycle. It piles up and is shunted to lactate and alanine. Carbs worsen the problem because they flood pyruvate production. Fat bypasses pyruvate (converted to acetyl-CoA directly via β-oxidation), so a low-carb, high-fat diet improves the picture. The key is that lactate worsens with carbs, not fasting.'
+  },
+  {
+    name: 'Glucokinase deficiency',
+    blurb: 'A 5-year-old girl has postprandial hyperglycemia (high blood glucose after meals) but normal fasting glucose. She does not have diabetes.',
+    labs: [
+      'Fasting glucose: 88 mg/dL (normal)',
+      'Glucose 2 hours after a meal: 245 mg/dL (elevated)',
+      'Insulin level after meal: normal (rises appropriately)',
+      'Glycated hemoglobin (HbA1c): 5.8% (nearly normal)',
+      'Glucokinase activity in liver and pancreas: 50% of normal',
+      'Other hexokinases: normal'
+    ],
+    q: 'Why does this patient have high postprandial glucose despite normal insulin secretion?',
+    opts: [
+      'Glucokinase deficiency in the liver reduces glucose phosphorylation and glucose uptake after meals',
+      'Insulin resistance prevents muscle glucose uptake',
+      'Type 1 diabetes destroyed the pancreatic beta cells',
+      'Glucose-6-phosphatase is overactive, draining glucose from the liver',
+      'Glucagon is inappropriately elevated, driving hepatic glucose output'
+    ],
+    why: 'Glucokinase (hexokinase IV) is the "glucose sensor" in liver and pancreatic beta cells. A heterozygous deficiency means the liver cannot trap postprandial glucose fast enough, so glucose spikes. Fasting glucose is normal because gluconeogenesis is intact. Insulin secretion is normal because the defect is in the liver enzyme, not the pancreas (the beta cell still senses glucose, just less efficiently). HbA1c is normal because overall glucose control is mild.'
+  },
+  {
+    name: 'Cystic fibrosis (CFTR mutation)',
+    blurb: 'A 3-month-old infant presents with meconium ileus (intestinal obstruction). Newborn screening shows elevated immunoreactive trypsinogen.',
+    labs: [
+      'Sweat chloride: 95 mEq/L (abnormally high; normal <40)',
+      'Pancreatic enzymes: elevated',
+      'Fecal elastase: low (pancreatic insufficiency)',
+      'Fat-soluble vitamins (A, D, E, K): low',
+      'Stool chymotrypsin: absent',
+      'CFTR gene: two mutations detected'
+    ],
+    q: 'What type of transport protein is defective in cystic fibrosis?',
+    opts: [
+      'ABC transporter (chloride channel that pumps Cl⁻ across epithelial cell membranes)',
+      'Symporter (Na⁺-glucose cotransporter)',
+      'Antiporter (Na⁺-Ca²⁺ exchanger)',
+      'Voltage-gated ion channel (potassium channel)',
+      'Aquaporin (water channel protein)'
+    ],
+    why: 'CFTR (Cystic Fibrosis Transmembrane Conductance Regulator) is an ATP-dependent chloride channel (ABC transporter). Without it, chloride cannot be secreted normally, so mucus becomes thick and sticky, blocking pancreatic ducts and airways. Elevated sweat chloride is the diagnostic hallmark (normal sweat reabsorbs chloride via CFTR; absent CFTR means chloride stays in sweat, making it salty).'
+  },
+  {
+    name: 'Glycogen storage disease Type I (glucose-6-phosphatase deficiency)',
+    blurb: 'A 4-year-old boy has severe fasting hypoglycemia, hepatomegaly (enlarged liver), and "doll-like" facial features with short stature.',
+    labs: [
+      'Fasting blood glucose: 28 mg/dL (critical hypoglycemia)',
+      'Lactate: 9.5 mmol/L (very high)',
+      'Uric acid: 12 mg/dL (very high)',
+      'Triglycerides: 2800 mg/dL (extremely high)',
+      'Liver size: massively enlarged',
+      'Glucose-6-phosphatase activity: absent or <5% of normal'
+    ],
+    q: 'Why does glucose-6-phosphatase deficiency cause both hypoglycemia and lactic acidosis?',
+    opts: [
+      'G6Pase catalyzes the final step of both glycogenolysis and gluconeogenesis; without it, glucose cannot be released into blood, so glycolysis and lactate production continue unchecked',
+      'Glucokinase is overactive and traps all glucose as G6P',
+      'Pyruvate carboxylase is deficient, blocking gluconeogenesis entirely',
+      'Glycogen phosphorylase is inactive and cannot mobilize liver glycogen',
+      'Fructose-1,6-bisphosphatase is deficient, blocking both pathways equally'
+    ],
+    why: 'G6Pase is the last step of both glycogenolysis (G1P → G6P → glucose) and gluconeogenesis (OAA → → G6P → glucose). Without it, G6P accumulates and is shunted into glycolysis, producing excess pyruvate → lactate. Blood glucose cannot be maintained because glucose is trapped in the hepatocyte. This is called Von Gierke disease, and patients need frequent feeding (every 3 hours) to avoid hypoglycemic seizures.'
+  },
+  {
+    name: 'Alpha-1 antitrypsin deficiency (severe)',
+    blurb: 'A 35-year-old man with no smoking history presents with progressive emphysema and cirrhosis. He has severe respiratory symptoms and abnormal liver function.',
+    labs: [
+      'Alpha-1 antitrypsin level: <57 mg/dL (severely low; normal >150)',
+      'Liver function tests: elevated transaminases (ALT, AST)',
+      'Bilirubin: mildly elevated',
+      'Albumin: low',
+      'Pulmonary function: severe obstruction (FEV1 30%)',
+      'Chest X-ray: basilar-predominant emphysema'
+    ],
+    q: 'How does alpha-1 antitrypsin deficiency lead to lung and liver damage?',
+    opts: [
+      'Neutrophil elastase accumulates unchecked, destroying lung tissue; aggregated AAT protein injures hepatocytes',
+      'Liver produces excess albumin, overwhelming the lungs',
+      'Pancreatic proteases leak into the lungs and cause emphysema',
+      'Neutrophils are overproduced and attack normal lung tissue',
+      'The CFTR gene is also mutated, causing dual organ failure'
+    ],
+    why: 'Alpha-1 antitrypsin is a serine protease inhibitor (antiprotease) that protects lung tissue from neutrophil elastase. Without it, elastase destroys the elastic fibers in lungs, causing early-onset emphysema (especially basilar lobes, opposite of smoking). In the liver, misfolded AAT protein accumulates and triggers hepatocellular damage and cirrhosis. This is a non-transport protein defect, but it affects proteolysis balance—relevant to enzyme regulation on the exam.'
+  },
+  {
+    name: 'Malate-aspartate shuttle defect',
+    blurb: 'A 28-year-old woman has muscle weakness and fatigue during intense aerobic exercise, but normal strength at rest. Muscle biopsy shows normal mitochondrial structure.',
+    labs: [
+      'Blood lactate during exercise: low (should be high)',
+      'Blood pyruvate during exercise: elevated',
+      'Blood alanine during exercise: very high (should be lower)',
+      'Muscle ATP: low during exercise',
+      'Cytosolic NADH: accumulates during exercise',
+      'Mitochondrial NADH oxidation: normal (ETC works)'
+    ],
+    q: 'What is preventing the muscle from fully oxidizing cytosolic NADH during exercise?',
+    opts: [
+      'Malate-aspartate shuttle defect; cytosolic NADH cannot be transported into mitochondria, so NAD+ is depleted and glycolysis slows',
+      'Complex I deficiency; NADH cannot be oxidized by the ETC',
+      'Pyruvate dehydrogenase is inactive; pyruvate cannot enter the TCA cycle',
+      'Glycogen phosphorylase is deficient; glycogenolysis cannot supply pyruvate',
+      'Lactate dehydrogenase is overactive; pyruvate is shunted away from oxidation'
+    ],
+    why: 'The malate-aspartate shuttle transfers reducing equivalents from cytosolic NADH into the mitochondria (NADH cannot cross the inner membrane directly). A defect means cytosolic NADH accumulates, NAD+ is depleted, and glycolysis stalls. Pyruvate made from amino acids accumulates and forms alanine (which is exported). The ETC works fine, but there is no NADH to feed it because the shuttle is broken. Exercise is when demand is highest, so symptoms appear then.'
+  },
+  {
+    name: 'Isocitrate dehydrogenase inhibition (oncogenic mutation)',
+    blurb: 'A 62-year-old man with a brain glioma has elevated 2-hydroxyglutarate (2-HG) levels. The mutation is in IDH1, an isocitrate dehydrogenase isoform found in the cytosol.',
+    labs: [
+      '2-Hydroxyglutarate (2-HG): markedly elevated (normal <1 mmol/L)',
+      'Citrate: elevated',
+      'Alpha-ketoglutarate: normal to low',
+      'Lactate: elevated',
+      'NADPH: elevated (normally consumed in biosynthesis)',
+      'Acetyl-CoA: normal'
+    ],
+    q: 'How does an IDH1 mutation cause elevated 2-HG and altered metabolism?',
+    opts: [
+      'Mutant IDH1 catalyzes the reduction of α-ketoglutarate to 2-HG instead of oxidizing isocitrate; this blocks the TCA cycle and depletes NAD+',
+      'The IDH1 mutation causes overproduction of isocitrate in the mitochondria',
+      '2-HG is made by normal IDH3, but the mutant IDH1 prevents its degradation',
+      'Lactate dehydrogenase is overactive and produces 2-HG from lactate',
+      'The mutation occurs in the mitochondrial isocitrate dehydrogenase (IDH2), not the cytosolic IDH1'
+    ],
+    why: 'Mutant IDH1 has a "gain-of-function" that converts α-ketoglutarate to 2-HG (an oncometabolite). This blocks the normal TCA cycle by consuming its intermediate and depleting NAD+. Cancer cells accumulate 2-HG, which blocks demethylases and causes epigenetic changes that drive tumor growth. This is a sophisticated exam question testing both enzyme catalysis and understanding how a mutation changes enzymatic function.'
+  },
+  {
+    name: 'Fanconi renotubular syndrome (secondary to alcohol)',
+    blurb: 'A 52-year-old man with chronic alcohol use disorder presents with polyuria, polydipsia, and muscle weakness. His kidneys are damaged but structures are normal on ultrasound.',
+    labs: [
+      'Blood pH: 7.28 (acidemia)',
+      'Serum bicarbonate: 14 mEq/L (low)',
+      'Serum potassium: 2.8 mEq/L (low)',
+      'Serum phosphate: 1.5 mg/dL (low)',
+      'Urine glucose: present (but blood glucose is normal)',
+      'Urine amino acids: elevated (including glycine, alanine)'
+    ],
+    q: 'What is the primary defect causing loss of glucose and amino acids in urine?',
+    opts: [
+      'Proximal tubule cells have impaired ATP-dependent reabsorption (Na⁺-glucose cotransport and amino acid cotransport require ATP and fail)',
+      'Insulin deficiency causes hyperglycemia and glucosuria (spilling over the renal threshold)',
+      'Glomerular filtration rate is elevated, forcing more filtrate through the nephron',
+      'Genetic mutations in GLUT1 on the glomerular basement membrane',
+      'Alcohol directly damages aquaporins, preventing water reabsorption'
+    ],
+    why: 'Chronic alcohol damages mitochondria in proximal tubule cells, depleting ATP. Secondary active transporters (SGLT2 for glucose, amino acid cotransporters) require ATP to reabsorb filtered glucose and amino acids against concentration gradients. Without ATP, these valuable substrates are lost in urine. Additionally, renal tubular acidosis develops because H⁺ secretion (also ATP-dependent) is impaired. This is not a primary enzyme or transport protein defect, but a consequence of energy (ATP) depletion.'
+  }
+];
+
+
+/* ================= STATE ================= */
+let currentMode = 'cascade';
+let currentScenario = 'fed';
+let currentQuestionIdx = 0;
+let currentResponse = null;
+let showReason = false;
+
+/* ================= RENDER ================= */
+function renderApp() {
+  const app = document.getElementById('app');
+
+  if (currentMode === 'cascade') {
+    renderCascade();
+  } else if (currentMode === 'detect') {
+    renderDetect();
+  }
+}
+
+function renderCascade() {
+  const app = document.getElementById('app');
+
+  if (!document.querySelector('[data-mode="cascade"]').classList.contains('active')) {
+    document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-mode="cascade"]').classList.add('active');
+  }
+
+  const scenarios = Object.keys(SCEN);
+
+  if (currentScenario === null) {
+    app.innerHTML = `
+      <div class="intro-text">
+        <h2>Cascade: Step-by-Step Pathway Logic</h2>
+        <p>Choose a metabolic scenario and follow the hormone signal through the cell. Each question builds on the last, testing your understanding of how one change triggers the next.</p>
+      </div>
+      <div class="nav-grid">
+        ${scenarios.map(key => {
+          const s = SCEN[key];
+          return `
+            <div class="nav-card" onclick="startCascade('${key}')">
+              <h3>${s.name}</h3>
+              <p>${s.steps.length} questions</p>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    return;
+  }
+
+  const scenario = SCEN[currentScenario];
+  const step = scenario.steps[currentQuestionIdx];
+  const progress = currentQuestionIdx + 1;
+  const total = scenario.steps.length;
+
+  let html = `
+    <div class="progress">
+      <span>${progress} / ${total}</span>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: ${progress/total*100}%"></div>
+      </div>
+    </div>
+    <div class="question-card">
+      <h2 style="margin-top: 0">${scenario.name}</h2>
+      <div class="q-text">${step.q}</div>
+      <div class="options">
+  `;
+
+  const options = [step.a, ...step.w];
+  const shuffled = options.map((o, i) => ({ opt: o, correct: i === 0 }));
+  shuffled.sort(() => Math.random() - 0.5);
+
+  shuffled.forEach((item, i) => {
+    const isSelected = currentResponse === i;
+    const isCorrect = item.correct;
+    let className = 'option';
+    if (isSelected && isCorrect) className += ' correct';
+    if (isSelected && !isCorrect) className += ' incorrect';
+    if (isSelected) className += ' selected';
+
+    html += `
+      <div class="${className}" onclick="selectOption('cascade', ${i}, ${isCorrect})">
+        <div class="option-letter">${String.fromCharCode(65 + i)}</div>
+        <div class="option-text">
+          <div class="txt">${item.opt}</div>
+          ${isSelected && showReason ? `<div class="option-reason">${step.why}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  if (currentResponse !== null) {
+    html += `
+      <div class="actions">
+        ${currentQuestionIdx < scenario.steps.length - 1 ? `<button class="btn" onclick="nextQuestion('cascade')">Next</button>` : `<button class="btn" onclick="backToScenarios()">Back to scenarios</button>`}
+        ${!showReason ? `<button class="btn ghost" onclick="toggleReason()">Show explanation</button>` : ''}
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+function renderDetect() {
+  const app = document.getElementById('app');
+
+  if (!document.querySelector('[data-mode="detect"]').classList.contains('active')) {
+    document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-mode="detect"]').classList.add('active');
+  }
+
+  const caseItem = CASES[currentQuestionIdx % CASES.length];
+  const progress = currentQuestionIdx + 1;
+  const total = CASES.length;
+
+  let html = `
+    <div class="progress">
+      <span>${progress} / ${total}</span>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: ${progress/total*100}%"></div>
+      </div>
+    </div>
+    <div class="question-card">
+      <h2 style="margin-top: 0">${caseItem.name}</h2>
+      <div class="q-context"><strong>Patient:</strong> ${caseItem.blurb}</div>
+      <div class="q-labs">
+        <strong>Lab findings:</strong><br>
+        ${caseItem.labs.map(l => '• ' + l).join('<br>')}
+      </div>
+      <div class="q-text">${caseItem.q}</div>
+      <div class="options">
+  `;
+
+  const options = caseItem.opts;
+  const shuffled = options.map((o, i) => ({ opt: o, correct: i === 0 }));
+  shuffled.sort(() => Math.random() - 0.5);
+
+  shuffled.forEach((item, i) => {
+    const isSelected = currentResponse === i;
+    const isCorrect = item.correct;
+    let className = 'option';
+    if (isSelected && isCorrect) className += ' correct';
+    if (isSelected && !isCorrect) className += ' incorrect';
+    if (isSelected) className += ' selected';
+
+    html += `
+      <div class="${className}" onclick="selectOption('detect', ${i}, ${isCorrect})">
+        <div class="option-letter">${String.fromCharCode(65 + i)}</div>
+        <div class="option-text">
+          <div class="txt">${item.opt}</div>
+          ${isSelected && showReason ? `<div class="option-reason">${caseItem.why}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  if (currentResponse !== null) {
+    html += `
+      <div class="actions">
+        ${currentQuestionIdx < CASES.length - 1 ? `<button class="btn" onclick="nextQuestion('detect')">Next</button>` : `<button class="btn" onclick="resetMode('detect')">Restart</button>`}
+        ${!showReason ? `<button class="btn ghost" onclick="toggleReason()">Show explanation</button>` : ''}
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+
+/* ================= INTERACTION ================= */
+function startCascade(scenario) {
+  currentScenario = scenario;
+  currentQuestionIdx = 0;
+  currentResponse = null;
+  showReason = false;
+  renderCascade();
+}
+
+function selectOption(mode, idx, isCorrect) {
+  currentResponse = idx;
+  showReason = true;
+  renderApp();
+}
+
+function nextQuestion(mode) {
+  currentQuestionIdx++;
+  currentResponse = null;
+  showReason = false;
+  renderApp();
+}
+
+function toggleReason() {
+  showReason = !showReason;
+  renderApp();
+}
+
+function backToScenarios() {
+  currentScenario = null;
+  currentQuestionIdx = 0;
+  currentResponse = null;
+  showReason = false;
+  renderCascade();
+}
+
+function resetMode(mode) {
+  currentQuestionIdx = 0;
+  currentResponse = null;
+  showReason = false;
+  if (mode === 'cascade') {
+    currentScenario = null;
+  }
+  renderApp();
+}
+
+// Nav clicks
+document.querySelectorAll('.nav-card').forEach(card => {
+  card.addEventListener('click', function() {
+    currentMode = this.dataset.mode;
+    currentQuestionIdx = 0;
+    currentResponse = null;
+    showReason = false;
+    if (currentMode === 'cascade') {
+      currentScenario = null;
+    }
+    renderApp();
+  });
+});
+
+// Initial render
+renderApp();
+</script>
+
+</body>
+</html>
