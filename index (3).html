@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BCH 4024 Exam 2 Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+:root {
+  --bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --text: #1f2937;
+  --text-dim: #6b7280;
+  --accent: #3b82f6;
+  --accent-light: #eff6ff;
+  --correct: #10b981;
+  --incorrect: #ef4444;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-dim: #cbd5e1;
+    --accent: #60a5fa;
+    --accent-light: #0c4a6e;
+    --correct: #10b981;
+    --incorrect: #ef4444;
+  }
+}
+
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+header p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.nav-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.nav-card.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.nav-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.nav-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.content {
+  display: none;
+}
+
+.content.active {
+  display: block;
+}
+
+.question-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.q-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: var(--text);
+}
+
+.q-context {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  border-radius: 4px;
+}
+
+.q-labs {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 6px;
+  font-family: 'Inter', monospace;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.q-labs strong {
+  color: var(--accent);
+}
+
+.chain-visual {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.chain-node {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.chain-node.up { border-color: var(--accent); color: var(--accent); }
+.chain-node.dn { border-color: var(--incorrect); color: var(--incorrect); }
+
+.chain-arrow { color: var(--text-dim); font-weight: 600; }
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.option {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.option-letter {
+  flex: 0 0 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.option.selected .option-letter {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.option.correct {
+  border-color: var(--correct);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.option.correct .option-letter {
+  background: var(--correct);
+  color: white;
+  border-color: var(--correct);
+}
+
+.option.incorrect {
+  border-color: var(--incorrect);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.option.incorrect .option-letter {
+  background: var(--incorrect);
+  color: white;
+  border-color: var(--incorrect);
+}
+
+.option-text { flex: 1; }
+.option-text .txt { font-weight: 500; }
+.option.incorrect .txt { text-decoration: line-through; color: var(--text-dim); }
+
+.option-reason {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.option.correct .option-reason { color: var(--correct); }
+.option.incorrect .option-reason { color: var(--incorrect); }
+
+.feedback-toggle {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+
+.feedback-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.feedback-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.progress {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn:hover { filter: brightness(1.1); }
+
+.btn.ghost {
+  background: var(--bg);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.intro-text {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.intro-text h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>BCH 4024 Exam 2 Practice</h1>
+    <p>Pathway logic and clinical reasoning</p>
+  </header>
+
+  <div class="nav-grid">
+    <div class="nav-card active" data-mode="cascade">
+      <h3>Cascade</h3>
+      <p>Step-by-step hormone and enzyme logic</p>
+    </div>
+    <div class="nav-card" data-mode="detect">
+      <h3>Find the Fault</h3>
+      <p>Diagnose from lab findings</p>
+    </div>
+  </div>
+
+  <div id="app"></div>
+
+  <footer>
+    Practice material written for SI sessions. It is not from your professors, so check it against your own lecture slides.
+  </footer>
+</div>
+
+<script>
+/* ================= DATA ================= */
+
+const SCEN = {
+  epi: {
+    name: 'Epinephrine stress',
+    blurb: 'Sudden threat triggers an acute fight-or-flight response. Trace epinephrine through muscle and liver.',
+    steps: [
+      {
+        q: 'Epinephrine is released from the adrenal medulla. What receptor does it bind in skeletal muscle?',
+        a: 'Beta-adrenergic receptor, a Gs-coupled GPCR',
+        w: ['Alpha-1 adrenergic receptor, a Gq GPCR', 'Insulin receptor, a receptor tyrosine kinase', 'Muscarinic acetylcholine receptor, a Gi GPCR'],
+        why: 'Epinephrine activates beta-adrenergic receptors on muscle and heart via Gs (raises cAMP). Alpha-adrenergic receptors are on blood vessels and trigger vasoconstriction.'
+      },
+      {
+        q: 'Epinephrine binds and the beta-receptor activates Gs. What happens to adenylyl cyclase?',
+        a: 'It is stimulated to convert ATP to cAMP and pyrophosphate',
+        w: ['It is inhibited by the Gs alpha subunit', 'It converts cAMP to AMP (opposite reaction)', 'It phosphorylates the Gs protein directly'],
+        why: 'Gs-coupled receptors stimulate adenylyl cyclase, raising cAMP. This cAMP activates PKA.'
+      },
+      {
+        q: 'PKA is now active in the muscle cell. What does it do to glycogen phosphorylase?',
+        a: 'It phosphorylates phosphorylase kinase, which phosphorylates phosphorylase (activating it)',
+        w: ['It directly phosphorylates glycogen synthase, turning it off', 'It dephosphorylates phosphorylase, turning it off', 'It activates PP1, which dephosphorylates phosphorylase'],
+        why: 'PKA phosphorylates phosphorylase kinase, which then phosphorylates glycogen phosphorylase. Phosphorylated phosphorylase (phosphorylase a) is the active form, so glycogenolysis proceeds.'
+      },
+      {
+        q: 'At the same time, PKA phosphorylates glycogen synthase. What is the consequence?',
+        a: 'Glycogen synthase is inactivated, stopping new glycogen synthesis',
+        w: ['Glycogen synthase is activated and makes more glycogen', 'Glycogen synthase is unaffected because PKA targets only phosphorylase', 'Glycogen synthase cleaves existing glycogen bonds'],
+        why: 'PKA phosphorylates both phosphorylase kinase (activating breakdown) and glycogen synthase (inactivating synthesis). This prevents glycogen from being built and broken down at the same time.'
+      },
+      {
+        q: 'In the liver, epinephrine also activates the same beta-receptor. What is the critical difference in how the liver responds compared to muscle?',
+        a: 'The liver has glucose-6-phosphatase, so it can export free glucose into the blood to fuel muscles',
+        w: ['Muscle has glucose-6-phosphatase, not the liver', 'The liver does not express glycogen phosphorylase', 'The liver only synthesizes glycogen, never breaks it down'],
+        why: 'Both muscle and liver break down glycogen to G6P when epinephrine hits. But only the liver has G6Pase to strip the phosphate and release free glucose into the blood. Muscle keeps G6P for its own glycolysis.'
+      },
+      {
+        q: 'Overall, how does epinephrine prepare the body for acute stress?',
+        a: 'Muscles get rapid glucose from liver glycogenolysis; their own glycogen breaks down for ATP; glucose is oxidized fast in glycolysis',
+        w: ['Muscles switch to fat oxidation and ignore glucose', 'The liver makes new glucose from amino acids only', 'Blood glucose stays low to conserve glucose for the brain'],
+        why: 'Stress requires fast ATP. Glycogenolysis floods glucose, glycolysis burns it quickly, and muscle gets fuel from two sources: its own stores and liver export. This is a "burst" state, not sustainable.'
+      }
+    ]
+  },
+  mitochondrial: {
+    name: 'Energy crisis in mitochondria',
+    blurb: 'A cell is starving for ATP. Trace what happens when the electron transport chain is impaired.',
+    steps: [
+      {
+        q: 'The TCA cycle is running, producing NADH and FADH2. But Complex I is dysfunctional and cannot oxidize NADH. What happens to NADH?',
+        a: 'NADH accumulates in the matrix because it cannot be reoxidized to NAD+',
+        w: ['NADH is quickly converted to ATP to compensate', 'NADH is exported to the cytosol for use elsewhere', 'The TCA cycle speeds up to bypass Complex I'],
+        why: 'Complex I is the entry point for NADH electrons. Without it, NADH piles up and NAD+ becomes scarce. The TCA cycle stalls because isocitrate dehydrogenase needs NAD+.'
+      },
+      {
+        q: 'As NAD+ becomes scarce, what happens to glycolysis in the cytosol?',
+        a: 'Glyceraldehyde-3-phosphate dehydrogenase cannot oxidize G3P to 1,3-BPG because NAD+ is needed for this step',
+        w: ['Glycolysis speeds up to compensate for the mitochondrial problem', 'Glycolysis is unaffected because it generates ATP directly', 'Pyruvate is stored as glycogen instead of entering mitochondria'],
+        why: 'Glycolysis requires NAD+ at the G3P dehydrogenase step. If mitochondrial NAD+ cannot be regenerated, cytosolic NAD+ gets depleted too, and glycolysis stalls.'
+      },
+      {
+        q: 'To keep some ATP production going, the cell shunts pyruvate to lactate via lactate dehydrogenase. Why does this work?',
+        a: 'Lactate dehydrogenase converts pyruvate back to lactate, regenerating NAD+ so glycolysis can keep running',
+        w: ['Lactate directly generates ATP via a specialized pathway', 'Lactate is exported and triggers more glucose uptake', 'Lactate replaces NAD+ as an electron carrier'],
+        why: 'LDH reduces pyruvate to lactate, oxidizing NADH back to NAD+. This regenerates the NAD+ that glycolysis needs, even though no ATP is gained from the lactate itself. It is a NAD+ rescue, not an energy source.'
+      },
+      {
+        q: 'What would a blood test show in this patient?',
+        a: 'High lactate and low ATP, because glycolysis runs but cannot fully oxidize pyruvate',
+        w: ['High pyruvate and normal lactate, because lactate dehydrogenase is inactive', 'Low lactate and normal ATP, because the cell compensates perfectly', 'High glucose and normal ATP, because glycolysis is accelerated'],
+        why: 'Glycolysis still produces pyruvate, but pyruvate piles up and is shunted to lactate, causing lactic acidosis. ATP remains low because glycolysis yields only 2 ATP per glucose, and the Krebs-ETC pathway is broken.'
+      },
+      {
+        q: 'If the Complex I defect is severe enough, how would the proton gradient across the inner mitochondrial membrane be affected?',
+        a: 'The gradient would collapse because protons are not pumped by Complexes I, III, and IV without electron flow',
+        w: ['The gradient would strengthen as ATP synthase works harder to compensate', 'The gradient is unaffected because Complex II still works', 'The gradient persists but is reversed in direction'],
+        why: 'Electron transport drives proton pumping at Complexes I, III, and IV. Without electron flow from NADH, most of the pump power is lost. The few protons pumped by Complex II are not enough to sustain the membrane potential.'
+      }
+    ]
+  }
+};
+
+const CASES = [
+  {
+    "name": "Fasting confusion with lactic acidosis",
+    "blurb": "6-year-old with lethargy and confusion after an overnight fast.",
+    "labs": [
+      "Blood glucose 38 mg/dL",
+      "Lactate elevated",
+      "Alanine elevated",
+      "Pyruvate elevated"
+    ],
+    "q": "Which reaction is most directly blocked in this patient's pyruvate carboxylase deficiency?",
+    "opts": [
+      "Pyruvate to oxaloacetate, the first step of gluconeogenesis from pyruvate",
+      "Pyruvate to acetyl-CoA, the step that feeds the TCA cycle during a fast",
+      "Glucose-6-phosphate to glucose, the step that releases glucose from the liver",
+      "Glycogen to glucose-1-phosphate, the step that mobilizes stored liver glycogen",
+      "Lactate to pyruvate, the step that recycles lactate in the liver during a fast"
+    ],
+    "why": "Pyruvate carboxylase (biotin-dependent, mitochondrial) converts pyruvate to oxaloacetate, the entry step of gluconeogenesis from pyruvate, lactate, and alanine. Without it, fasting glucose cannot be made, and pyruvate backs up into lactate and alanine. PDH makes acetyl-CoA, glucose-6-phosphatase releases glucose, and glycogen phosphorylase breaks down glycogen, so those steps are intact."
+  },
+  {
+    "name": "Infant with lactic acidosis after feeds",
+    "blurb": "8-month-old with developmental delay and hypotonia. Acidosis worsens after carbohydrate-rich feeds.",
+    "labs": [
+      "Lactate 7.1 mmol/L (high)",
+      "Pyruvate 1.2 mmol/L (high)",
+      "Lactate:pyruvate ratio about 6 (normal)",
+      "Alanine high",
+      "Blood glucose normal",
+      "Acidosis improves when carbohydrate intake is lowered"
+    ],
+    "q": "Why does a carbohydrate-rich meal worsen the lactic acidosis in this patient?",
+    "opts": [
+      "Glucose still becomes pyruvate, but pyruvate cannot form acetyl-CoA, so more is reduced to lactate",
+      "High insulin after the meal shuts down gluconeogenesis, so the liver can no longer clear lactate",
+      "Glucose metabolism drains NAD+ from the matrix, so electron transport stalls and lactate builds",
+      "Carbohydrate directly activates lactate dehydrogenase, so pyruvate is pulled toward lactate",
+      "Carbohydrate inhibits pyruvate carboxylase, so pyruvate cannot enter gluconeogenesis"
+    ],
+    "why": "This is pyruvate dehydrogenase (PDH) complex deficiency. Pyruvate cannot be converted to acetyl-CoA, so every glucose load adds more pyruvate that is shunted to lactate and alanine. The normal lactate:pyruvate ratio points to a PDH problem, while an electron transport chain defect gives a high ratio. Lowering carbohydrate intake lowers the pyruvate load."
+  },
+  {
+    "name": "Toddler with exercise intolerance and high lactate",
+    "blurb": "2-year-old with developmental delay, exercise intolerance, and lactic acidosis.",
+    "labs": [
+      "Lactate elevated",
+      "Pyruvate elevated",
+      "Lactate:pyruvate ratio high (above 25)",
+      "Mitochondrial NADH:NAD+ ratio high",
+      "Low ATP in muscle",
+      "Blood glucose normal"
+    ],
+    "q": "Why does Complex I deficiency raise both NADH and lactate?",
+    "opts": [
+      "NADH cannot be reoxidized, so NAD+ runs low and pyruvate becomes lactate to regenerate NAD+",
+      "Complex I normally oxidizes lactate, so its loss lets lactate build up in the matrix",
+      "Without Complex I, FADH2 can no longer enter the chain, so the TCA cycle backs up into lactate",
+      "Low ATP inhibits lactate dehydrogenase, so pyruvate is pushed into the TCA cycle instead",
+      "High NADH activates pyruvate dehydrogenase, so acetyl-CoA floods the TCA cycle and lactate rises"
+    ],
+    "why": "Complex I oxidizes NADH and passes electrons to ubiquinone while pumping protons. It does not make ATP directly. When it fails, NADH accumulates and NAD+ falls, so glycolysis can only continue if lactate dehydrogenase reoxidizes NADH by turning pyruvate into lactate. High NADH actually inhibits PDH, and FADH2 enters at Complex II, so it is not blocked."
+  },
+  {
+    "name": "Teen with mild, stable high glucose",
+    "blurb": "15-year-old with mildly raised fasting glucose found on routine screening. No symptoms or weight loss, and a parent has similar results.",
+    "labs": [
+      "Fasting glucose 118 mg/dL",
+      "HbA1c 6.2%",
+      "2-hour glucose rises less than 60 mg/dL above fasting after a meal",
+      "Insulin secretion appropriate for the glucose level",
+      "Glucokinase activity about 50% of normal"
+    ],
+    "q": "Which normal role of glucokinase explains this higher glucose set point?",
+    "opts": [
+      "It is the glucose sensor, so more glucose is needed to trigger insulin secretion and uptake",
+      "It is the main glucose transporter in beta cells, so less glucose enters and insulin release falls",
+      "It removes the phosphate from glucose-6-phosphate, so free glucose floods the blood after meals",
+      "It is inhibited by glucose-6-phosphate in muscle, so muscle glucose uptake is slowed",
+      "It phosphorylates the insulin receptor in the liver, so insulin signaling is blunted after meals"
+    ],
+    "why": "This is glucokinase (hexokinase IV) deficiency, also called GCK-MODY. Glucokinase has a high Km and is not inhibited by glucose-6-phosphate, so it works as the glucose sensor of beta cells and hepatocytes. With less activity, a higher glucose level is needed to trigger insulin secretion and hepatic uptake. The set point rises, but regulation stays intact, so the glucose level is mild and stable."
+  },
+  {
+    "name": "Child with a huge liver and fasting hypoglycemia",
+    "blurb": "4-year-old with severe fasting hypoglycemia, a very large liver, and doll-like facies.",
+    "labs": [
+      "Fasting glucose 28 mg/dL",
+      "Lactate 9.5 mmol/L (high)",
+      "Uric acid 12 mg/dL (high)",
+      "Triglycerides 2,800 mg/dL (high)",
+      "Glucagon injection does not raise blood glucose"
+    ],
+    "q": "Why does glucose-6-phosphatase deficiency cause both hypoglycemia and lactic acidosis?",
+    "opts": [
+      "Both glycogenolysis and gluconeogenesis end here, so glucose-6-phosphate is diverted to lactate",
+      "Glucose-6-phosphatase breaks down lactate in the liver, so lactate rises without it",
+      "Pyruvate carboxylase is blocked, so pyruvate cannot enter gluconeogenesis and becomes lactate",
+      "Excess liver glycogen inhibits glycolysis, which lowers blood glucose and raises lactate",
+      "Glycogen synthase is overactive, so glucose is locked into glycogen and lactate rises"
+    ],
+    "why": "Glucose-6-phosphatase is the final step of both glycogenolysis and gluconeogenesis. When it is missing, glucose-6-phosphate cannot become free glucose, so it is pushed through glycolysis to lactate (and into the pentose phosphate pathway and fatty acid synthesis, which raise uric acid and triglycerides). This is von Gierke disease, and the failed glucagon response confirms that both routes to glucose are blocked."
+  },
+  {
+    "name": "Child with seizures that worsen during fasting",
+    "blurb": "6-year-old with frequent seizures and developmental delay. Brain imaging is normal, and seizures worsen with fasting.",
+    "labs": [
+      "Blood glucose 92 mg/dL (normal)",
+      "CSF glucose 18 mg/dL (low; normal 40 to 70)",
+      "CSF:blood glucose ratio low",
+      "CSF lactate low"
+    ],
+    "q": "Which protein defect best explains the low CSF glucose despite normal blood glucose?",
+    "opts": [
+      "GLUT1 on blood-brain barrier endothelium, which moves glucose from blood into the brain",
+      "GLUT2 on hepatocytes, which releases glucose from the liver into the blood after a meal",
+      "GLUT4 on brain neurons, which moves to the cell membrane in response to insulin signaling",
+      "SGLT1 on intestinal epithelial cells, which absorbs glucose from the gut lumen after a meal",
+      "Hexokinase in brain neurons, which phosphorylates glucose and traps it inside the cell"
+    ],
+    "why": "GLUT1 deficiency syndrome. GLUT1 moves glucose across the blood-brain barrier, so a defect leaves blood glucose normal but starves the brain. The low CSF glucose with a low CSF:blood ratio and low CSF lactate is the hallmark. GLUT4 is the insulin-responsive transporter of muscle and fat, GLUT2 is the liver and beta cell transporter, and SGLT1 absorbs glucose in the gut."
+  },
+  {
+    "name": "Teen with hypoglycemia during a prolonged fast",
+    "blurb": "14-year-old with hypoglycemia after a prolonged fast. A mutation leaves the liver bifunctional enzyme PFK-2/FBPase-2 stuck in its kinase (PFK-2) mode.",
+    "labs": [
+      "Fasting glucose 48 mg/dL",
+      "Glucagon high (appropriate)",
+      "Liver fructose-2,6-bisphosphate high despite the glucagon",
+      "Lactate mildly elevated",
+      "Alanine elevated"
+    ],
+    "q": "Why does a persistently high fructose-2,6-bisphosphate level cause fasting hypoglycemia?",
+    "opts": [
+      "It activates PFK-1 and inhibits FBPase-1, so glycolysis wins over gluconeogenesis in fasting",
+      "It inhibits glycogen phosphorylase, so stored liver glycogen cannot be broken down during fasting",
+      "It blocks pyruvate carboxylase, so pyruvate cannot be converted to oxaloacetate for gluconeogenesis",
+      "It blocks glucagon from raising cAMP, so PKA never turns on the liver's fasting response",
+      "It activates glucokinase, so glucose is trapped in the liver as glucose-6-phosphate"
+    ],
+    "why": "Normally, glucagon raises cAMP, PKA phosphorylates the bifunctional enzyme, the FBPase-2 domain becomes active, and fructose-2,6-bisphosphate falls. Low F2,6BP releases FBPase-1 inhibition and removes PFK-1 activation, so gluconeogenesis wins. If the enzyme stays in PFK-2 mode, F2,6BP stays high, PFK-1 stays on, FBPase-1 stays off, and the liver cannot make glucose."
+  },
+  {
+    "name": "Toddler with hypoglycemia during a stomach illness",
+    "blurb": "3-year-old with hypoglycemia and lactic acidosis during a stomach illness with poor feeding. Glucose is normal after meals.",
+    "labs": [
+      "Glucose 45 mg/dL after a 14-hour fast",
+      "Lactate high",
+      "Alanine high",
+      "Glucose normal 2 hours after a meal",
+      "Liver glycogen stores normal"
+    ],
+    "q": "Why does FBPase-1 deficiency cause hypoglycemia during fasting but not after meals?",
+    "opts": [
+      "Dietary glucose covers a meal, but fasting depends on gluconeogenesis, which needs FBPase-1",
+      "FBPase-1 is only expressed in the liver during fasting, so it is absent in the fed state",
+      "After meals, insulin turns on an alternate liver enzyme that bypasses the FBPase-1 step",
+      "Fasting destroys the enzyme through proteolysis, so activity is only lost after hours without food",
+      "Glycogen stores are normal, so glycogen breakdown fully covers glucose needs during any fast"
+    ],
+    "why": "After a meal, glucose comes from the diet. In a short fast, glycogenolysis covers glucose needs. After glycogen runs low (about 12 to 24 hours, or sooner in a sick child), blood glucose depends on gluconeogenesis, and FBPase-1 is required for it. Lactate, alanine, and glycerol back up, which explains the lactic acidosis."
+  },
+  {
+    "name": "Infant with vomiting and hypoglycemia after fruit",
+    "blurb": "9-month-old with vomiting, sweating, and shakiness soon after starting fruit purees and sweetened cereal. Failure to thrive.",
+    "labs": [
+      "Glucose 38 mg/dL after a fructose-containing feed",
+      "Uric acid elevated",
+      "AST and ALT elevated",
+      "Phosphate low"
+    ],
+    "q": "Why does fructose cause hypoglycemia in aldolase B deficiency?",
+    "opts": [
+      "Fructose-1-phosphate traps phosphate, which blocks glycogen breakdown and gluconeogenesis",
+      "Fructose competes with glucose for uptake into liver cells, so less glucose reaches the blood",
+      "Fructose is converted to ammonia in the liver, which then inhibits glycogen phosphorylase",
+      "Fructokinase is missing, so fructose accumulates in the blood and suppresses glucose release",
+      "Fructose is converted to galactose, which blocks glucose-6-phosphate formation in the liver"
+    ],
+    "why": "Aldolase B cleaves fructose-1-phosphate. When it is missing, fructose-1-phosphate accumulates and traps phosphate, which depletes ATP, impairs glycogenolysis and gluconeogenesis, and raises uric acid. Treatment is removing fructose, sucrose, and sorbitol. Fructokinase deficiency is a different, benign condition (essential fructosuria)."
+  },
+  {
+    "name": "Newborn with jaundice and cataracts",
+    "blurb": "2-week-old with poor feeding, vomiting, jaundice, and an enlarged liver. Oil-drop cataracts are seen on eye exam.",
+    "labs": [
+      "Galactose elevated in blood",
+      "Galactose-1-phosphate elevated in red cells",
+      "Urine positive for reducing sugar but negative on a glucose-specific test",
+      "GALT enzyme activity absent"
+    ],
+    "q": "Which mechanism best explains the cataracts?",
+    "opts": [
+      "Aldose reductase converts galactose to galactitol, which pools in the lens and pulls in water",
+      "Galactose-1-phosphate cross-links the lens crystallin proteins, which makes the whole lens cloudy",
+      "Low UDP-galactose stops glycoprotein synthesis in the lens, so crystallins cannot be made",
+      "Galactose blocks the lens glucose transporter, so lens cells lose ATP and swell",
+      "Galactose is oxidized in the lens to a strong acid that lowers pH and denatures proteins"
+    ],
+    "why": "Classic galactosemia (GALT deficiency). Excess galactose is reduced by aldose reductase to galactitol, which cannot be metabolized further, so it accumulates in the lens and draws in water (osmotic injury, cataracts). Galactose-1-phosphate accumulation is what injures the liver, kidney, and brain. Treatment is removing lactose and galactose."
+  },
+  {
+    "name": "Boy with hemolysis and exercise-induced muscle injury",
+    "blurb": "8-year-old boy with chronic hemolytic anemia, exertional muscle cramps, and cola-colored urine after sprinting. Male relatives on the maternal side are affected.",
+    "labs": [
+      "Hemoglobin low, reticulocytes high",
+      "LDH high, indirect bilirubin high",
+      "CK high after exercise",
+      "Urine myoglobin positive after exertion",
+      "Red cell and muscle PGK activity low"
+    ],
+    "q": "Why does PGK deficiency affect both red cells and working muscle?",
+    "opts": [
+      "PGK makes the first ATP of glycolysis, and both cell types rely on glycolytic ATP",
+      "PGK feeds the pentose phosphate pathway, so both tissues lose NADPH and break down",
+      "PGK is expressed only in red cells and muscle, so all other tissues are fully spared",
+      "PGK clears lactate from the blood, so lactate builds up and damages both cell types",
+      "PGK is the only kinase in glycolysis, so every tissue loses all ATP production equally"
+    ],
+    "why": "Phosphoglycerate kinase (X-linked) converts 1,3-bisphosphoglycerate and ADP to 3-phosphoglycerate and ATP, the first substrate-level phosphorylation of glycolysis. Red cells have no mitochondria and rely entirely on glycolysis, and muscle relies on it heavily during intense exercise, so those tissues fail first. The enzyme is present in all tissues, and glycolysis has other kinases (hexokinase, PFK-1, pyruvate kinase)."
+  },
+  {
+    "name": "Young woman with high lactate during exercise",
+    "blurb": "28-year-old woman with fatigue and muscle weakness during intense aerobic exercise. She is normal at rest.",
+    "labs": [
+      "Lactate very high after exercise",
+      "Lactate:pyruvate ratio high",
+      "Cytosolic NADH:NAD+ ratio high",
+      "Isolated mitochondria oxidize NADH normally"
+    ],
+    "q": "Why does an NADH shuttle defect raise lactate even though the electron transport chain is normal?",
+    "opts": [
+      "Cytosolic NADH cannot hand electrons to mitochondria, so LDH reoxidizes it by making lactate",
+      "Complex I cannot oxidize the NADH that enters the matrix, so NADH backs up into the cytosol",
+      "Pyruvate dehydrogenase is inhibited during exercise, so pyruvate has no route other than lactate",
+      "NADH crosses the inner membrane freely, but the acidic matrix prevents it from being oxidized",
+      "Pyruvate carboxylase diverts pyruvate into oxaloacetate, which is then reduced to lactate"
+    ],
+    "why": "NADH cannot cross the inner mitochondrial membrane, so the malate-aspartate shuttle passes its electrons into the matrix. If the shuttle fails, cytosolic NADH rises, glycolysis needs NAD+, and lactate dehydrogenase makes lactate to regenerate it. A high lactate:pyruvate ratio signals a high cytosolic NADH:NAD+ ratio, and normal isolated mitochondria show that the chain itself is fine."
+  },
+  {
+    "name": "Child with lactic acidosis and abnormal muscle mitochondria",
+    "blurb": "7-year-old with exercise intolerance, developmental delay, and lactic acidosis.",
+    "labs": [
+      "Lactate high, lactate:pyruvate ratio high",
+      "Muscle biopsy: Complex III activity low",
+      "Complex I, II, and IV activities normal"
+    ],
+    "q": "Why does a Complex III defect disrupt electrons that come from both NADH and FADH2?",
+    "opts": [
+      "Electrons from Complex I and Complex II both pass through Complex III toward cytochrome c",
+      "Complex III accepts electrons only from FADH2, so NADH oxidation would continue normally",
+      "Complex III is where oxygen is reduced to water, so electrons back up in front of it",
+      "Complex III oxidizes NADH directly, so NADH builds up while FADH2 oxidation is unaffected",
+      "Complex III does not pump protons, so the gradient is unchanged and ATP synthesis continues"
+    ],
+    "why": "Ubiquinol, which collects electrons from both Complex I (NADH) and Complex II (FADH2), passes them to Complex III, then to cytochrome c, then to Complex IV. Complex III also pumps protons. A block here stops electron flow from both entry points, so NADH rises and pyruvate is converted to lactate. Oxygen is reduced at Complex IV, not Complex III."
+  },
+  {
+    "name": "Infant with cardiomyopathy and severe lactic acidosis",
+    "blurb": "4-month-old with poor feeding, hypotonia, seizures, and a thickened heart.",
+    "labs": [
+      "Lactate profoundly high",
+      "Muscle biopsy: cytochrome c oxidase activity low",
+      "COX-negative muscle fibers",
+      "Echocardiogram: hypertrophic cardiomyopathy"
+    ],
+    "q": "Why can a Complex IV defect be especially severe?",
+    "opts": [
+      "It is the last complex and passes electrons to oxygen, so a block backs up the whole chain",
+      "It is the only complex that pumps protons, so a block removes the gradient completely",
+      "It builds the subunits of ATP synthase, so ATP synthase cannot assemble without it",
+      "It oxidizes FADH2 directly from the TCA cycle, so the cycle loses its main electron carrier",
+      "It reduces cytochrome c, so a block leaves too little reduced cytochrome c for Complex III"
+    ],
+    "why": "Complex IV (cytochrome c oxidase) is the terminal step: it takes electrons from cytochrome c and reduces O2 to water. A block here leaves every upstream carrier full, so NADH and FADH2 cannot be reoxidized and ATP synthesis collapses. Complexes I, III, and IV all pump protons, and Complex IV oxidizes cytochrome c rather than reducing it. Tissues with high energy demand, such as the brain and heart, are hit hardest."
+  },
+  {
+    "name": "Teen with obesity and high glucose after meals",
+    "blurb": "16-year-old with obesity, acanthosis nigricans, and fatty liver. Fasting glucose is near normal, but glucose rises sharply after meals.",
+    "labs": [
+      "Fasting glucose 104 mg/dL",
+      "2-hour post-meal glucose 190 mg/dL",
+      "Fasting insulin high",
+      "Triglycerides high",
+      "Ultrasound: hepatic steatosis"
+    ],
+    "q": "In muscle, which step of the insulin signaling cascade best explains the slow glucose clearance after meals?",
+    "opts": [
+      "Akt activation after PI3K is blunted, so GLUT4 vesicles do not fuse with the plasma membrane",
+      "Gs activation by the insulin receptor is blunted, so too little cAMP is made to insert GLUT4",
+      "GLUT4 is absent from muscle cells, so glucose cannot enter them even when insulin is high",
+      "Hexokinase II is inhibited in muscle, so glucose cannot be phosphorylated as it enters",
+      "SGLT2 in muscle no longer responds to insulin, so sodium-coupled glucose uptake falls sharply"
+    ],
+    "why": "The insulin receptor is a receptor tyrosine kinase, not a GPCR. Insulin binding triggers autophosphorylation, IRS recruitment, PI3K activation, PIP3 formation, and Akt activation, which drives GLUT4 vesicles to fuse with the plasma membrane. In resistance, this step is blunted, so postprandial glucose clearance is slow. Compensatory high insulin holds fasting glucose near normal early on. GLUT4 is present, but trapped in vesicles."
+  },
+  {
+    "name": "Adult with type 2 diabetes starting semaglutide",
+    "blurb": "54-year-old with type 2 diabetes on metformin starts weekly semaglutide, a GLP-1 receptor agonist.",
+    "labs": [
+      "HbA1c falls from 8.4% to 7.1%",
+      "Body weight falls",
+      "Postprandial glucagon lower",
+      "No hypoglycemia episodes",
+      "Early nausea and slower gastric emptying"
+    ],
+    "q": "Why does this drug lower glucose with a low risk of hypoglycemia?",
+    "opts": [
+      "The Gs-coupled receptor raises beta cell cAMP, boosting insulin release only when glucose is high",
+      "The receptor is a tyrosine kinase that mimics insulin, so glucose uptake rises in every tissue",
+      "It blocks SGLT2 in the kidney tubule, so glucose is lost in urine regardless of blood level",
+      "It closes the KATP channel directly, so beta cells secrete insulin at any blood glucose level",
+      "It raises glucagon, which drives muscle glucose uptake while the liver stores more glycogen"
+    ],
+    "why": "The GLP-1 receptor is a Gs-coupled GPCR. Activation raises cAMP in beta cells and amplifies insulin secretion that glucose has already triggered, so the effect fades as glucose falls. It also suppresses glucagon, slows gastric emptying, and reduces appetite. Sulfonylureas close KATP channels regardless of glucose, which is why they cause more hypoglycemia, and SGLT2 inhibitors work in the kidney."
+  },
+  {
+    "name": "Adult with lung cancer starting an EGFR inhibitor",
+    "blurb": "52-year-old with non-small cell lung cancer carrying an activating EGFR exon 19 deletion starts gefitinib, a tyrosine kinase inhibitor.",
+    "labs": [
+      "Phospho-EGFR falls on treatment",
+      "Phospho-Akt falls on treatment",
+      "Tumor shrinks on imaging",
+      "Apoptosis markers rise in biopsy",
+      "Acne-like rash develops"
+    ],
+    "q": "How does blocking the EGFR kinase push these cancer cells toward apoptosis?",
+    "opts": [
+      "Without autophosphorylation, adaptors are not recruited, so Ras/MAPK and PI3K/Akt signals fall",
+      "Blocking the receptor raises PIP3, which activates Akt and tips the cell toward apoptosis",
+      "Gefitinib binds the extracellular ligand domain, so EGF cannot bind and the receptor is degraded",
+      "Gefitinib directly cleaves procaspases, so apoptosis occurs regardless of EGFR signaling",
+      "G proteins lose their link to the receptor, so Gs cannot raise cAMP and cell growth stops"
+    ],
+    "why": "EGFR is a receptor tyrosine kinase. Ligand binding causes dimerization and autophosphorylation, which recruits adaptors that activate Ras/MAPK (proliferation) and PI3K/Akt (survival). Gefitinib blocks the intracellular ATP-binding site, so phospho-sites and downstream survival signals fall. Tumors with an activating mutation depend on this signaling, so apoptosis follows. Akt promotes survival, and antibodies such as cetuximab are the drugs that block the extracellular domain."
+  },
+  {
+    "name": "Adult with descending paralysis after home-canned food",
+    "blurb": "34-year-old with blurred vision, drooping eyelids, dilated pupils, and weakness that spreads downward after eating home-canned vegetables.",
+    "labs": [
+      "Sensation intact",
+      "Mental status normal",
+      "Nerve conduction normal",
+      "Low acetylcholine release at the neuromuscular junction",
+      "Serum assay positive for botulinum toxin"
+    ],
+    "q": "How does botulinum toxin cause flaccid paralysis?",
+    "opts": [
+      "It cleaves SNARE proteins, so acetylcholine vesicles cannot fuse with the presynaptic membrane",
+      "It blocks nicotinic receptors on muscle, so acetylcholine binds but cannot open the channel",
+      "It activates acetylcholinesterase, so acetylcholine is degraded before it reaches the receptor",
+      "It blocks presynaptic calcium channels, so calcium cannot enter the nerve terminal to trigger release",
+      "It blocks choline reuptake at the terminal, so the neuron runs out of acetylcholine to package"
+    ],
+    "why": "Botulinum toxin is a zinc protease that cleaves SNARE proteins, depending on the serotype: synaptobrevin (v-SNARE on the vesicle) or syntaxin and SNAP-25 (t-SNAREs on the plasma membrane). The SNARE complex zippers the two membranes together so they can fuse. Without it, acetylcholine is not released, so the muscle gets no signal even though the nerve and the receptors are normal."
+  },
+  {
+    "name": "Young adult with xanthomas and very high LDL",
+    "blurb": "28-year-old with tendon xanthomas, corneal arcus, and a parent who had a heart attack at age 40. His LDL receptors reach the cell surface and bind LDL normally, but LDL is not internalized.",
+    "labs": [
+      "LDL cholesterol 480 mg/dL",
+      "Tendon xanthomas",
+      "Corneal arcus",
+      "LDLR gene variant detected"
+    ],
+    "q": "Why does LDL stay in the blood when the receptor cannot be internalized?",
+    "opts": [
+      "The tail cannot recruit AP2 and clathrin, so no coated pit curves around the receptor",
+      "The receptor cannot bind apoB-100, so LDL is never recognized at the cell surface",
+      "Dynamin is overactive, so vesicles pinch off before the receptor and LDL are loaded",
+      "Endosomes cannot acidify, so LDL stays bound to the receptor and the receptor is degraded",
+      "LDL is made too fast in the liver, so receptors are saturated and cannot keep up"
+    ],
+    "why": "Receptor-mediated endocytosis of LDL needs the receptor's cytoplasmic tail to recruit AP2 and clathrin. The clathrin coat assembles on the inner membrane and bends it into a coated pit, and dynamin then pinches off the vesicle. If the receptor binds LDL but cannot recruit the coat, no pit forms, LDL is not cleared, and plasma LDL climbs (familial hypercholesterolemia). A binding defect is a different class of LDLR mutation."
+  },
+  {
+    "name": "Young adult with cramps and a second wind",
+    "blurb": "22-year-old with painful cramps and fatigue within minutes of starting exercise. Symptoms ease after about 10 minutes of slower exercise.",
+    "labs": [
+      "Forearm ischemic exercise test: no lactate rise",
+      "Ammonia rises normally",
+      "CK elevated after exercise",
+      "Muscle biopsy: glycogen accumulation, no phosphorylase activity"
+    ],
+    "q": "Why does the second wind occur in this patient?",
+    "opts": [
+      "Rising blood flow delivers glucose and fatty acids that muscle can burn without phosphorylase",
+      "Phosphorylase is slowly re-expressed as the muscle warms up, so glycogen can be mobilized",
+      "Liver phosphorylase is released into the blood and then takes over the job of the muscle enzyme",
+      "Phosphorylase kinase bypasses the missing enzyme once epinephrine levels rise during exercise",
+      "Lactate from muscle is converted to glycogen by the Cori cycle, which refills local stores"
+    ],
+    "why": "McArdle disease is muscle glycogen phosphorylase (myophosphorylase) deficiency. Muscle cannot use its own glycogen, so intense early exercise runs out of fuel and lactate does not rise. After about 10 minutes, increased blood flow brings blood glucose and free fatty acids, which muscle can use without breaking down glycogen. The liver isoform is normal and stays in the liver."
+  },
+  {
+    "name": "Child with exertional cramps and high uric acid",
+    "blurb": "9-year-old with exercise intolerance, muscle cramps, and dark urine after exertion.",
+    "labs": [
+      "No lactate rise with exercise",
+      "Ammonia high after exercise",
+      "Uric acid high",
+      "CK high",
+      "Muscle biopsy: PFK-M activity absent, glycogen increased"
+    ],
+    "q": "Why does this block raise ammonia and uric acid after exercise?",
+    "opts": [
+      "Low ATP raises AMP, which AMP deaminase turns into IMP and ammonia, and IMP is degraded to uric acid",
+      "Blocked glycolysis forces muscle to burn amino acids, which releases ammonia and uric acid directly",
+      "Fructose-6-phosphate builds up and enters the pentose phosphate pathway, which releases urate",
+      "PFK is also a purine synthesis enzyme, so its loss disrupts nucleotide recycling and raises urate",
+      "Rising lactate blocks renal clearance of ammonia and urate, so both build up in blood"
+    ],
+    "why": "Tarui disease is muscle phosphofructokinase-1 deficiency. Glycolysis stops at the PFK-1 step, so ATP falls and AMP rises. Muscle AMP deaminase converts AMP to IMP and ammonia, and IMP is then degraded through purine catabolism to uric acid. Lactate does not rise because glycolysis is blocked upstream of pyruvate."
+  },
+  {
+    "name": "Man with confusion, ataxia, and lactic acidosis",
+    "blurb": "45-year-old man with heavy alcohol use and poor nutrition presents with confusion, unsteady gait, and abnormal eye movements.",
+    "labs": [
+      "Lactate high",
+      "Pyruvate high",
+      "Alpha-ketoglutarate high",
+      "Red cell transketolase activity low",
+      "Blood glucose normal"
+    ],
+    "q": "Which pair of enzymes best explains the lactic acidosis?",
+    "opts": [
+      "PDH and alpha-ketoglutarate dehydrogenase, both thiamine-dependent, so pyruvate is shunted to lactate",
+      "Citrate synthase and aconitase, both thiamine-dependent, so early TCA steps stall and lactate rises",
+      "Pyruvate carboxylase and PEPCK, both thiamine-dependent, so gluconeogenesis fails and lactate stays",
+      "Isocitrate dehydrogenase and malate dehydrogenase, both thiamine-dependent, so NADH production stops",
+      "Pyruvate kinase and enolase, both thiamine-dependent, so glycolysis stalls and ATP falls"
+    ],
+    "why": "Thiamine deficiency (Wernicke encephalopathy). Thiamine pyrophosphate is a cofactor for pyruvate dehydrogenase, alpha-ketoglutarate dehydrogenase, branched-chain keto acid dehydrogenase, and transketolase. When PDH is impaired, pyruvate backs up into lactate, and alpha-ketoglutarate also accumulates. Thiamine should be given before glucose in these patients."
+  },
+  {
+    "name": "Child with hemolysis and progressive neurologic decline",
+    "blurb": "2-year-old with chronic hemolytic anemia, weakness, and progressive neurologic decline.",
+    "labs": [
+      "Hemoglobin low, reticulocytes high",
+      "Dihydroxyacetone phosphate markedly elevated in red cells",
+      "Red cell triose phosphate isomerase activity very low"
+    ],
+    "q": "How does this block cut the ATP yield of glycolysis?",
+    "opts": [
+      "DHAP cannot become glyceraldehyde-3-phosphate, so only half of each glucose reaches payoff",
+      "DHAP cannot be made from fructose-1,6-bisphosphate, so glycolysis stops before the cleavage step",
+      "Glyceraldehyde-3-phosphate cannot be oxidized, so neither triose phosphate makes NADH or 1,3-BPG",
+      "Both trioses form normally, but neither can be phosphorylated again, so the payoff phase is skipped",
+      "DHAP is converted directly to pyruvate, so the payoff phase is bypassed and no ATP is made"
+    ],
+    "why": "Aldolase splits fructose-1,6-bisphosphate into DHAP and glyceraldehyde-3-phosphate (G3P). Only G3P continues through the payoff phase, so triose phosphate isomerase normally converts DHAP to G3P. When it is missing, DHAP accumulates and only one G3P per glucose proceeds, so net ATP falls from about 2 to about 0 per glucose. Red cells depend on glycolysis, so they hemolyze."
+  },
+  {
+    "name": "Adult with exertional stiffness and no lactate rise",
+    "blurb": "30-year-old with stiffness, cramps, and dark urine after intense exercise. He is normal at rest and with mild activity.",
+    "labs": [
+      "Forearm exercise test: lactate does not rise",
+      "Pyruvate rises with exercise",
+      "CK high after exertion",
+      "Urine myoglobin positive after intense exercise"
+    ],
+    "q": "Why does LDH deficiency limit intense exercise?",
+    "opts": [
+      "Muscle cannot quickly regenerate NAD+ from NADH, so glycolytic flux and ATP supply fall",
+      "Pyruvate cannot enter mitochondria without LDH, so aerobic ATP production fails even at rest",
+      "LDH produces the NADH that feeds the electron transport chain, so respiration slows",
+      "Lactate is the main fuel of fast-twitch fibers, so its absence directly starves them",
+      "Without lactate, nothing signals glycogen breakdown, so glycogen is not used during exercise"
+    ],
+    "why": "Lactate dehydrogenase reoxidizes NADH to NAD+ when pyruvate is reduced to lactate, which keeps glycolysis running during intense effort when mitochondria cannot keep up. Without it, NAD+ regeneration is limited, so flux and ATP fall and fibers are injured (myoglobinuria). Low-intensity activity relies on mitochondria, so he is normal at rest. LDH consumes NADH, it does not make it."
+  },
+  {
+    "name": "Child with hemolysis and exercise intolerance",
+    "blurb": "3-year-old with chronic hemolytic anemia and exercise intolerance. Red cell studies show absent adenylate kinase activity.",
+    "labs": [
+      "Reticulocytes high",
+      "LDH high",
+      "Red cell adenylate kinase activity absent",
+      "Other glycolytic enzymes normal"
+    ],
+    "q": "Which reaction is lost in this patient?",
+    "opts": [
+      "2 ADP to ATP plus AMP, which gives emergency ATP and raises AMP as an energy signal",
+      "ADP plus Pi to ATP, the main ATP-forming reaction of oxidative phosphorylation",
+      "ATP plus creatine to phosphocreatine plus ADP, which buffers ATP during short bursts",
+      "AMP to adenosine plus Pi, which clears AMP from the cell after contraction",
+      "ATP plus glucose to ADP plus glucose-6-phosphate, the first step of glycolysis"
+    ],
+    "why": "Adenylate kinase catalyzes 2 ADP <-> ATP + AMP. It rescues ATP when demand is high, and the resulting AMP signals low energy (activating AMPK and PFK-1). Without it, cells that run near the energy limit, such as red cells and working muscle, fail under stress. Oxidative phosphorylation makes ATP from ADP and Pi, creatine kinase buffers with phosphocreatine, and hexokinase does the first glycolysis step."
+  },
+  {
+    "name": "Newborn with encephalopathy and abnormal urine organic acids",
+    "blurb": "Newborn with poor tone, seizures, and brain malformations.",
+    "labs": [
+      "Lactate mildly elevated",
+      "Urine organic acids abnormal",
+      "Fumarase activity low in fibroblasts"
+    ],
+    "q": "Which urine organic acid finding fits a block at fumarase?",
+    "opts": [
+      "High fumarate, because fumarate cannot be hydrated to form malate in the TCA cycle",
+      "High malate, because malate cannot be oxidized to oxaloacetate in the TCA cycle",
+      "High citrate, because citrate cannot be converted to isocitrate in the TCA cycle",
+      "High succinate, because succinate dehydrogenase is the blocked enzyme in the TCA cycle",
+      "High oxaloacetate, because oxaloacetate cannot condense with acetyl-CoA in the TCA cycle"
+    ],
+    "why": "Fumarase adds water across the double bond of fumarate to make malate. A block leaves fumarate (and often succinate upstream) elevated in urine, a pattern called fumaric aciduria. The other options name the wrong enzyme for each step: aconitase, malate dehydrogenase, citrate synthase, and succinate dehydrogenase."
+  },
+  {
+    "name": "Toddler with myopathy and high succinate",
+    "blurb": "Toddler with developmental delay, progressive myopathy, and exercise intolerance.",
+    "labs": [
+      "Urine succinate high",
+      "Lactate elevated",
+      "Muscle biopsy: Complex II (SDH) activity low",
+      "Complexes I, III, and IV normal"
+    ],
+    "q": "Which statement about Complex II explains the high succinate?",
+    "opts": [
+      "It is a TCA cycle enzyme that oxidizes succinate to fumarate and feeds ubiquinone",
+      "It oxidizes NADH from the TCA cycle and pumps protons into the intermembrane space",
+      "It passes electrons from cytochrome c to oxygen and pumps protons across the membrane",
+      "It reduces fumarate to succinate in the chain, consuming FADH2 made elsewhere in the cell",
+      "It converts succinyl-CoA to succinate and makes GTP as one step of the TCA cycle itself"
+    ],
+    "why": "Succinate dehydrogenase is both a TCA cycle enzyme (succinate to fumarate) and Complex II of the chain. It passes electrons from its FADH2 to ubiquinone and does not pump protons. When it fails, succinate accumulates and the TCA cycle and chain are both impaired. NADH oxidation is Complex I, oxygen reduction is Complex IV, and succinyl-CoA synthetase makes GTP."
+  },
+  {
+    "name": "Adult with a glioma and high 2-hydroxyglutarate",
+    "blurb": "62-year-old with a brain tumor. Tumor sequencing finds an IDH1 R132H mutation.",
+    "labs": [
+      "2-hydroxyglutarate very high in tumor",
+      "Alpha-ketoglutarate relatively low",
+      "NADPH consumption increased",
+      "DNA hypermethylation on tumor profiling"
+    ],
+    "q": "How does the mutant enzyme produce 2-hydroxyglutarate?",
+    "opts": [
+      "It gains a new activity, reducing alpha-ketoglutarate to 2-hydroxyglutarate using NADPH",
+      "It runs faster than normal, so extra alpha-ketoglutarate spills over into 2-hydroxyglutarate",
+      "It loses all activity, so isocitrate builds up and is shunted to 2-hydroxyglutarate",
+      "It oxidizes alpha-ketoglutarate to succinate, and 2-hydroxyglutarate is a side product",
+      "It blocks IDH3 in the matrix, so alpha-ketoglutarate dehydrogenase makes 2-hydroxyglutarate"
+    ],
+    "why": "IDH1 is the cytosolic NADP+-dependent isocitrate dehydrogenase. The R132H mutation is a gain-of-function: instead of making alpha-ketoglutarate from isocitrate, it reduces alpha-ketoglutarate to D-2-hydroxyglutarate and consumes NADPH. 2-HG inhibits alpha-ketoglutarate-dependent enzymes such as histone and DNA demethylases, which causes hypermethylation and blocks differentiation."
+  },
+  {
+    "name": "Adult with a neuroendocrine tumor and high succinate",
+    "blurb": "35-year-old with a paraganglioma and an SDHB loss-of-function mutation.",
+    "labs": [
+      "Tumor succinate high",
+      "HIF-1 alpha stabilized despite normal oxygen",
+      "Tumor lactate high",
+      "Glycolytic gene expression up"
+    ],
+    "q": "How does SDH loss create a pseudohypoxic state in this tumor?",
+    "opts": [
+      "Succinate inhibits prolyl hydroxylases, so HIF-1 alpha is not degraded despite normal oxygen",
+      "Succinate activates VHL, so HIF-1 alpha is degraded faster and the tumor loses blood supply",
+      "Complex II loss raises oxygen use in the tumor, so local oxygen falls and HIF-1 alpha rises",
+      "Succinate binds HIF-1 alpha directly, which turns on glycolytic genes without changing stability",
+      "Loss of SDH raises ATP, which inhibits AMPK, so mTOR stays on and HIF-1 alpha accumulates"
+    ],
+    "why": "Prolyl hydroxylases need alpha-ketoglutarate and oxygen to mark HIF-1 alpha for VHL-mediated degradation. Accumulated succinate inhibits them (product inhibition), so HIF-1 alpha stays stable even with normal oxygen and drives glycolysis and angiogenesis genes. This is called pseudohypoxia. Without Complex II, oxygen use falls, not rises."
+  }
+];
+
+/* ================= STATE ================= */
+let currentMode = 'cascade';
+let currentScenario = null;
+let currentQuestionIdx = 0;
+let currentResponse = null;
+let showReason = false;
+let cachedShuffledCascade = null;
+let cachedShuffledDetect = null;
+
+/* ================= SHUFFLE HELPERS ================= */
+function createShuffledOptions(correctAnswer, wrongAnswers) {
+  const options = [correctAnswer, ...wrongAnswers];
+  const shuffled = options.map((o, i) => ({ opt: o, correct: i === 0 }));
+  shuffled.sort(() => Math.random() - 0.5);
+  return shuffled;
+}
+
+/* ================= RENDER ================= */
+function renderApp() {
+  const app = document.getElementById('app');
+
+  if (currentMode === 'cascade') {
+    renderCascade();
+  } else if (currentMode === 'detect') {
+    renderDetect();
+  }
+}
+
+function renderCascade() {
+  const app = document.getElementById('app');
+
+  if (!document.querySelector('[data-mode="cascade"]').classList.contains('active')) {
+    document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-mode="cascade"]').classList.add('active');
+  }
+
+  const scenarios = Object.keys(SCEN);
+
+  if (currentScenario === null) {
+    app.innerHTML = `
+      <div class="intro-text">
+        <h2>Cascade: Step-by-Step Pathway Logic</h2>
+        <p>Choose a metabolic scenario and follow the hormone signal through the cell. Each question builds on the last, testing your understanding of how one change triggers the next.</p>
+      </div>
+      <div class="nav-grid">
+        ${scenarios.map(key => {
+          const s = SCEN[key];
+          return `
+            <div class="nav-card" onclick="startCascade('${key}')">
+              <h3>${s.name}</h3>
+              <p>${s.steps.length} questions</p>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    return;
+  }
+
+  const scenario = SCEN[currentScenario];
+  const step = scenario.steps[currentQuestionIdx];
+  const progress = currentQuestionIdx + 1;
+  const total = scenario.steps.length;
+
+  // Create shuffled options ONLY if we haven't shuffled this question yet
+  if (!cachedShuffledCascade) {
+    cachedShuffledCascade = createShuffledOptions(step.a, step.w);
+  }
+
+  const shuffled = cachedShuffledCascade;
+
+  let html = `
+    <div class="progress">
+      <span>${progress} / ${total}</span>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: ${progress/total*100}%"></div>
+      </div>
+    </div>
+    <div class="question-card">
+      <h2 style="margin-top: 0">${scenario.name}</h2>
+      <div class="q-text">${step.q}</div>
+      <div class="options">
+  `;
+
+  shuffled.forEach((item, i) => {
+    const isSelected = currentResponse === i;
+    const isCorrect = item.correct;
+    let className = 'option';
+    if (isSelected && isCorrect) className += ' correct';
+    if (isSelected && !isCorrect) className += ' incorrect';
+    if (isSelected) className += ' selected';
+
+    html += `
+      <div class="${className}" onclick="selectOption('cascade', ${i}, ${isCorrect})">
+        <div class="option-letter">${String.fromCharCode(65 + i)}</div>
+        <div class="option-text">
+          <div class="txt">${item.opt}</div>
+          ${isSelected && showReason ? `<div class="option-reason">${step.why}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  if (currentResponse !== null) {
+    html += `
+      <div class="actions">
+        ${currentQuestionIdx < scenario.steps.length - 1 ? `<button class="btn" onclick="nextQuestion('cascade')">Next</button>` : `<button class="btn" onclick="backToScenarios()">Back to scenarios</button>`}
+        ${!showReason ? `<button class="btn ghost" onclick="toggleReason()">Show explanation</button>` : ''}
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+function renderDetect() {
+  const app = document.getElementById('app');
+
+  if (!document.querySelector('[data-mode="detect"]').classList.contains('active')) {
+    document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-mode="detect"]').classList.add('active');
+  }
+
+  const caseItem = CASES[currentQuestionIdx % CASES.length];
+  const progress = currentQuestionIdx + 1;
+  const total = CASES.length;
+
+  // Create shuffled options ONLY if we haven't shuffled this question yet
+  if (!cachedShuffledDetect) {
+    cachedShuffledDetect = createShuffledOptions(caseItem.opts[0], caseItem.opts.slice(1));
+  }
+
+  const shuffled = cachedShuffledDetect;
+
+  let html = `
+    <div class="progress">
+      <span>${progress} / ${total}</span>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: ${progress/total*100}%"></div>
+      </div>
+    </div>
+    <div class="question-card">
+      <h2 style="margin-top: 0">${caseItem.name}</h2>
+      <div class="q-context"><strong>Patient:</strong> ${caseItem.blurb}</div>
+      <div class="q-labs">
+        <strong>Lab findings:</strong><br>
+        ${caseItem.labs.map(l => '• ' + l).join('<br>')}
+      </div>
+      <div class="q-text">${caseItem.q}</div>
+      <div class="options">
+  `;
+
+  shuffled.forEach((item, i) => {
+    const isSelected = currentResponse === i;
+    const isCorrect = item.correct;
+    let className = 'option';
+    if (isSelected && isCorrect) className += ' correct';
+    if (isSelected && !isCorrect) className += ' incorrect';
+    if (isSelected) className += ' selected';
+
+    html += `
+      <div class="${className}" onclick="selectOption('detect', ${i}, ${isCorrect})">
+        <div class="option-letter">${String.fromCharCode(65 + i)}</div>
+        <div class="option-text">
+          <div class="txt">${item.opt}</div>
+          ${isSelected && showReason ? `<div class="option-reason">${caseItem.why}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  if (currentResponse !== null) {
+    html += `
+      <div class="actions">
+        ${currentQuestionIdx < CASES.length - 1 ? `<button class="btn" onclick="nextQuestion('detect')">Next</button>` : `<button class="btn" onclick="resetMode('detect')">Restart</button>`}
+        ${!showReason ? `<button class="btn ghost" onclick="toggleReason()">Show explanation</button>` : ''}
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+
+/* ================= INTERACTION ================= */
+function startCascade(scenario) {
+  currentScenario = scenario;
+  currentQuestionIdx = 0;
+  currentResponse = null;
+  showReason = false;
+  cachedShuffledCascade = null;
+  cachedShuffledDetect = null;
+  renderCascade();
+}
+
+function selectOption(mode, idx, isCorrect) {
+  currentResponse = idx;
+  showReason = true;
+  renderApp();
+}
+
+function nextQuestion(mode) {
+  currentQuestionIdx++;
+  currentResponse = null;
+  showReason = false;
+  cachedShuffledCascade = null;
+  cachedShuffledDetect = null;
+  renderApp();
+}
+
+function toggleReason() {
+  showReason = !showReason;
+  renderApp();
+}
+
+function backToScenarios() {
+  currentScenario = null;
+  currentQuestionIdx = 0;
+  currentResponse = null;
+  showReason = false;
+  cachedShuffledCascade = null;
+  cachedShuffledDetect = null;
+  renderCascade();
+}
+
+function resetMode(mode) {
+  currentQuestionIdx = 0;
+  currentResponse = null;
+  showReason = false;
+  cachedShuffledCascade = null;
+  cachedShuffledDetect = null;
+  if (mode === 'cascade') {
+    currentScenario = null;
+  }
+  renderApp();
+}
+
+// Nav clicks
+document.querySelectorAll('.nav-card').forEach(card => {
+  card.addEventListener('click', function() {
+    currentMode = this.dataset.mode;
+    currentQuestionIdx = 0;
+    currentResponse = null;
+    showReason = false;
+    cachedShuffledCascade = null;
+    cachedShuffledDetect = null;
+    if (currentMode === 'cascade') {
+      currentScenario = null;
+    }
+    renderApp();
+  });
+});
+
+// Initial render
+renderApp();
+</script>
+
+</body>
+</html>
